@@ -1,6 +1,6 @@
 # TM4C1294 Elevator Control
 
-Controls a 3 elevator/lift system using Texas Instruments TM4C1294 Cortex-M4 board using Keil RTX5 RTOS.
+Controls a 3 elevator/lift system on Texas Instruments TM4C1294 Cortex-M4 board using Keil RTX5 RTOS.
 
 Connects via Serial port with a simulator running on the host computer.
 
