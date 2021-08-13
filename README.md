@@ -6,6 +6,10 @@ Connects via Serial port with a simulator running on the host computer.
 
 ![Elevator simulator screenshot](./docs/elevator_sim.png)
 
+## Requirements
+
+The requirements are described in Portuguese here: [Requisitorios](./requisitos)
+
 ## Simulator
 
 On the elevator simulator folder ([elevator_sim](./elevator_sim)) you can find an
