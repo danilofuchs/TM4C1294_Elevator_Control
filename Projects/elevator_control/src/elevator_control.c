@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
 
@@ -10,18 +11,26 @@
 #include "kernel_info.h"
 #include "uart.h"
 
-osThreadId_t thread1_id, thread2_id;
+osThreadId_t main_thread_id;
 osMutexId_t uart_id;
 
-const osThreadAttr_t thread1_attr = {.name = "Thread 1"};
+const osThreadAttr_t main_thread_attr = {.name = "Main Thread"};
 
-const osThreadAttr_t thread2_attr = {.name = "Thread 2"};
-
-__NO_RETURN void osRtxIdleThread(void *argument) {
+__NO_RETURN void osRtxIdleThread(void* argument) {
   (void)argument;
 
   while (1) {
     asm("wfi");
+  }
+}
+
+void main_thread(void* arg) {
+  char input[16];
+  UARTgets(input, sizeof(input));
+  if (strcmp(input, "initialized")) {
+    UARTprintf("er\r");
+    UARTprintf("cr\r");
+    UARTprintf("dr\r");
   }
 }
 
@@ -35,6 +44,9 @@ void main(void) {
   printKernelState();
 
   uart_id = osMutexNew(NULL);
+  main_thread_id = osThreadNew(main_thread, NULL, &main_thread_attr);
+
+  printThreadInfo();
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 

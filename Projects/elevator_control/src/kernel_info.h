@@ -7,3 +7,4 @@
 
 void printKernelInfo(void);
 void printKernelState(void);
+void printThreadInfo(void);
