@@ -1067,6 +1067,9 @@
         <name>$PROJ_DIR$\src\startup_TM4C1294.s</name>
     </file>
     <file>
+        <name>$PROJ_DIR$\src\kernel_info.c</name>
+    </file>
+    <file>
         <name>$PROJ_DIR$\src\system_TM4C1294_TW.c</name>
     </file>
     <file>
