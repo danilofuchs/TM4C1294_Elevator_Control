@@ -3,18 +3,11 @@
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
 
-// Driverlib
-#include "driverlib/gpio.h"
-#include "driverlib/pin_map.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/uart.h"
-
-// Board specific
-#include "inc/hw_memmap.h"
-#include "system_TM4C1294.h"
-
 // Utils
 #include "utils/uartstdio.h"
+
+// Internal deps
+#include "uart.h"
 
 osThreadId_t thread1_id, thread2_id;
 osMutexId_t uart_id;
@@ -22,33 +15,6 @@ osMutexId_t uart_id;
 const osThreadAttr_t thread1_attr = {.name = "Thread 1"};
 
 const osThreadAttr_t thread2_attr = {.name = "Thread 2"};
-
-//----------
-// UART definitions
-extern void UARTStdioIntHandler(void);
-
-void UARTInit(void) {
-  // Enable UART0
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-  while (!SysCtlPeripheralReady(SYSCTL_PERIPH_UART0))
-    ;
-
-  // Initialize the UART for console I/O.
-  UARTStdioConfig(0, 115200, SystemCoreClock);
-
-  // Enable the GPIO Peripheral used by the UART.
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-  while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA))
-    ;
-
-  // Configure GPIO Pins for UART mode.
-  GPIOPinConfigure(GPIO_PA0_U0RX);
-  GPIOPinConfigure(GPIO_PA1_U0TX);
-  GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-}
-
-void UART0_Handler(void) { UARTStdioIntHandler(); }
-//----------
 
 void myKernelInfo(void) {
   osVersion_t osv;

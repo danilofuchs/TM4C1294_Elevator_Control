@@ -328,7 +328,7 @@
                 </option>
                 <option>
                     <name>PreInclude</name>
-                    <state>$PROJ_DIR$\src\uart.h</state>
+                    <state>$PROJ_DIR$\..\..\Projects\UART_inst\src\UART_Config.h</state>
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
@@ -638,7 +638,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>elevator_control.bin</state>
+                    <state>UART_inst.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -685,7 +685,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>elevator_control.out</state>
+                    <state>UART_inst.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -982,7 +982,7 @@
                 </option>
                 <option>
                     <name>IlinkTrustzoneImportLibraryOut</name>
-                    <state>elevator_control_import_lib.o</state>
+                    <state>UART_inst_import_lib.o</state>
                 </option>
                 <option>
                     <name>OILinkExtraOption</name>
@@ -1052,9 +1052,6 @@
         <name>$PROJ_DIR$\..\..\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\elevator_control.c</name>
-    </file>
-    <file>
         <name>$PROJ_DIR$\..\..\CMSIS-5.6.0\CMSIS\RTOS2\RTX\Library\IAR\IDE\CM4F\Exe\RTX_CM.a</name>
     </file>
     <file>
@@ -1070,7 +1067,7 @@
         <name>$PROJ_DIR$\src\system_TM4C1294_TW.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\uart.c</name>
+        <name>$PROJ_DIR$\src\UART_inst.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\..\..\TivaWare_C_Series-2.1.4.178\utils\uartstdio.c</name>
