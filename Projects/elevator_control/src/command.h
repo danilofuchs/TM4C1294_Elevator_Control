@@ -21,4 +21,7 @@ typedef struct {
   char argument;  // Optional argument
 } command_t;
 
+// Builds a string with the command
+void buildCommand(command_t command, char *command_string);
+
 #endif

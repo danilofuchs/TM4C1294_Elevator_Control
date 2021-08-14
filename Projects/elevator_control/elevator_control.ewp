@@ -1049,10 +1049,19 @@
         </settings>
     </configuration>
     <file>
+        <name>$PROJ_DIR$\src\command.c</name>
+    </file>
+    <file>
         <name>$PROJ_DIR$\..\..\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a</name>
     </file>
     <file>
+        <name>$PROJ_DIR$\src\elevator.c</name>
+    </file>
+    <file>
         <name>$PROJ_DIR$\src\elevator_control.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\src\kernel_info.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\..\..\CMSIS-5.6.0\CMSIS\RTOS2\RTX\Library\IAR\IDE\CM4F\Exe\RTX_CM.a</name>
@@ -1064,10 +1073,10 @@
         <name>$PROJ_DIR$\src\rtx_lib.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\startup_TM4C1294.s</name>
+        <name>$PROJ_DIR$\src\signal.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\kernel_info.c</name>
+        <name>$PROJ_DIR$\src\startup_TM4C1294.s</name>
     </file>
     <file>
         <name>$PROJ_DIR$\src\system_TM4C1294_TW.c</name>

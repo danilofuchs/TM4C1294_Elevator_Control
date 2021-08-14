@@ -26,13 +26,35 @@ __NO_RETURN void osRtxIdleThread(void* argument) {
   }
 }
 
-void main_thread(void* arg) {
+void initialize() {
   char input[16];
-  UARTgets(input, sizeof(input));
-  if (strcmp(input, "initialized")) {
+
+  while (1) {
+    UARTgets(input, sizeof(input));
+    if (!strcmp(input, "initialized")) {
+      continue;
+    }
+
     UARTprintf("er\r");
     UARTprintf("cr\r");
     UARTprintf("dr\r");
+    return;
+  }
+}
+
+void mainThread(void* arg) {
+  char input[16];
+
+  // initialize();
+
+  signal_t signal;
+
+  while (1) {
+    UARTgets(input, sizeof(input));
+    if (parseSignal(&signal, input) == -1) {
+      UARTprintf("Error: Invalid signal %s\r", input);
+    }
+    printSignal(&signal);
   }
 }
 
@@ -46,7 +68,7 @@ void main(void) {
   printKernelState();
 
   uart_id = osMutexNew(NULL);
-  main_thread_id = osThreadNew(main_thread, NULL, &main_thread_attr);
+  main_thread_id = osThreadNew(mainThread, NULL, &main_thread_attr);
 
   printThreadInfo();
 
