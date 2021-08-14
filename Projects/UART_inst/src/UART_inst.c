@@ -30,7 +30,7 @@ void UARTInit(void) {
     ;
 
   // Initialize the UART for console I/O.
-  UARTStdioConfig(0, 9600, SystemCoreClock);
+  UARTStdioConfig(0, 115200, SystemCoreClock);
 
   // Enable the GPIO Peripheral used by the UART.
   SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
