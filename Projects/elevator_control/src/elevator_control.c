@@ -8,7 +8,9 @@
 #include "utils/uartstdio.h"
 
 // Internal deps
+#include "command.h"
 #include "kernel_info.h"
+#include "signal.h"
 #include "uart.h"
 
 osThreadId_t main_thread_id;

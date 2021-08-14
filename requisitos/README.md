@@ -28,12 +28,12 @@ sistema de elevadores, atendendo os seguintes requisitos:
 
 - Inicializar cada elevador, abrindo portas no andar 0
 - Ao atingir um andar desejado, parar o elevador no ponto exato do alinhamento do andar
-- Após parar o elevador em um andar desejado, abrir a porta e esperar 1 segundo
+- Após parar o elevador em um andar desejado, abrir a porta e esperar até o sinal de abertura completa
 - Quando abrir a porta, apagar todas as luzes acesas nos botões correspondentes ao andar, direção e elevador atual
 - Ao receber um comando por botão interno, acender a luz deste botão
 - Durante percurso de subida e descida, atender chamadas de acordo com ordem de prioridades
-- Antes de qualquer início de movimentação, garantir que a porta está fechada e esperar 1 segundo
-- Caso não haja nenhum comando acionado para o elevador, fechar as portas após 5 segundos e manter-se no mesmo andar
+- Antes de qualquer início de movimentação, garantir que a porta está fechada e esperar até o sinal de fechamento completo
+- Caso não haja nenhum comando acionado para o elevador e esteja parado em um andar com portas abertas, fechar as portas após 5 segundos e manter-se no mesmo andar
 - Consultar altura dos elevadores periodicamente para verificar se o sistema está funcionando corretamente
 
 # Requisitos não funcionais
