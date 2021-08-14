@@ -1,1 +1,50 @@
-elevator_sim/output_log.txt
+# https://github.com/toptal/gitignore/blob/master/templates/IAREmbeddedWorkBench.gitignore
+
+# IAR C-STAT and C-RUN
+# Comment this out if you use C-Stat or C-Run to compile/analyze your project
+*.ewt
+
+# IAR Debugger files
+*.ewd
+
+# IAR Settings
+**/settings
+
+# IAR Debug Exe
+**/Debug
+**/Debug/Exe/
+**/Exe/*.sim
+
+# IAR Debug Obj
+**/Obj/*.pbd
+**/Obj/*.pbd.*
+**/Obj/*.pbi
+**/Obj/*.pbi.*
+
+# Log files
+**.log
+
+# IAR backup files
+Backup*
+
+# IAR .dep files
+*.dep
+
+# Compiled Binaries
+*.bin
+*.elf
+*.hex
+*.map
+**/ewarm
+
+# Trash files
+*.bak
+
+# Ninja clutter
+**/.ninja_deps
+**/.ninja_log
+**/build.ninja
+
+# C output
+*.a
+*.o
