@@ -1,5 +1,5 @@
-#ifndef __SIGNAL_H_
-#define __SIGNAL_H_
+#ifndef __SIGNAL_H__
+#define __SIGNAL_H__
 
 #include <stdint.h>
 

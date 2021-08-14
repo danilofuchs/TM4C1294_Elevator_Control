@@ -1,5 +1,5 @@
-#ifndef __ELEVATOR_H_
-#define __ELEVATOR_H_
+#ifndef __ELEVATOR_H__
+#define __ELEVATOR_H__
 
 typedef enum {
   elevator_left,

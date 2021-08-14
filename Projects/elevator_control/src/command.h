@@ -1,5 +1,5 @@
-#ifndef __COMMAND_H_
-#define __COMMAND_H_
+#ifndef __COMMAND_H__
+#define __COMMAND_H__
 
 #include "elevator.h"
 
