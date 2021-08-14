@@ -328,7 +328,7 @@
                 </option>
                 <option>
                     <name>PreInclude</name>
-                    <state>$PROJ_DIR$\..\..\Projects\UART_inst\src\UART_Config.h</state>
+                    <state>$PROJ_DIR$\..\..\Projects\elevator_control\src\UART_Config.h</state>
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
@@ -638,7 +638,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>UART_inst.bin</state>
+                    <state>elevator_control.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -685,7 +685,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>UART_inst.out</state>
+                    <state>elevator_control.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -982,7 +982,7 @@
                 </option>
                 <option>
                     <name>IlinkTrustzoneImportLibraryOut</name>
-                    <state>UART_inst_import_lib.o</state>
+                    <state>elevator_control_import_lib.o</state>
                 </option>
                 <option>
                     <name>OILinkExtraOption</name>
@@ -1067,7 +1067,7 @@
         <name>$PROJ_DIR$\src\system_TM4C1294_TW.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\UART_inst.c</name>
+        <name>$PROJ_DIR$\src\elevator_control.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\..\..\TivaWare_C_Series-2.1.4.178\utils\uartstdio.c</name>

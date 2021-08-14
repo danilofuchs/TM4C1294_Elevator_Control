@@ -12,5 +12,8 @@
     <project>
         <path>$WS_DIR$\Projects\UART_inst\UART_inst.ewp</path>
     </project>
+    <project>
+        <path>$WS_DIR$\Projects\elevator_control\elevator_control.ewp</path>
+    </project>
     <batchBuild />
 </workspace>
