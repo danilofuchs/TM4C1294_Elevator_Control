@@ -3,13 +3,17 @@
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
 
-// includes da biblioteca driverlib
+// Driverlib
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/uart.h"
+
+// Board specific
 #include "inc/hw_memmap.h"
 #include "system_TM4C1294.h"
+
+// Utils
 #include "utils/uartstdio.h"
 
 osThreadId_t thread1_id, thread2_id;
@@ -41,9 +45,9 @@ void UARTInit(void) {
   GPIOPinConfigure(GPIO_PA0_U0RX);
   GPIOPinConfigure(GPIO_PA1_U0TX);
   GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-}  // UARTInit
+}
 
-void UART0_Handler(void) { UARTStdioIntHandler(); }  // UART0_Handler
+void UART0_Handler(void) { UARTStdioIntHandler(); }
 //----------
 
 void myKernelInfo(void) {
@@ -54,8 +58,8 @@ void myKernelInfo(void) {
     UARTprintf("Kernel Version    : %d\n", osv.kernel);
     UARTprintf("Kernel API Version: %d\n\n", osv.api);
     UARTFlushTx(false);
-  }  // if
-}  // myKernelInfo
+  }
+}
 
 void myKernelState(void) {
   UARTprintf("Kernel State: ");
@@ -75,9 +79,9 @@ void myKernelState(void) {
     case osKernelError:
       UARTprintf("Error\n\n");
       break;
-  }  // switch
+  }
   UARTFlushTx(false);
-}  // myKernelState
+}
 
 void myThreadState(osThreadId_t thread_id) {
   osThreadState_t state;
@@ -101,8 +105,8 @@ void myThreadState(osThreadId_t thread_id) {
     case osThreadError:
       UARTprintf("Error\n");
       break;
-  }  // switch
-}  // myThreadState
+  }
+}
 
 void myThreadInfo(void) {
   osThreadId_t threads[8];
@@ -113,73 +117,18 @@ void myThreadInfo(void) {
     UARTprintf("  %s (priority %d) - ", osThreadGetName(threads[n]),
                osThreadGetPriority(threads[n]));
     myThreadState(threads[n]);
-  }  // for
+  }
   UARTprintf("\n");
   UARTFlushTx(false);
-}  // myThreadInfo
+}
 
-// osRtxIdleThread
 __NO_RETURN void osRtxIdleThread(void *argument) {
   (void)argument;
 
   while (1) {
-    // UARTprintf("Idle thread\n");
     asm("wfi");
-  }  // while
-}  // osRtxIdleThread
-
-// osRtxTimerThread
-
-__NO_RETURN void thread1(void *arg) {
-  uint32_t count = 0;
-
-  // Na primeira execu��o reporta estado do kernel e tarefas ativas
-  osMutexAcquire(uart_id, osWaitForever);
-  myKernelState();
-  myThreadInfo();
-  osMutexRelease(uart_id);
-
-  while (1) {
-    count++;
-
-    osMutexAcquire(uart_id, osWaitForever);
-    UARTprintf("%s, job %d beg.\n", osThreadGetName(osThreadGetId()), count);
-    osMutexRelease(uart_id);
-
-    for (int d = 0; d < 10000; d++)
-      ;  // atraso de software simulando C
-
-    osMutexAcquire(uart_id, osWaitForever);
-    UARTprintf("%s, job %d end.\n", osThreadGetName(osThreadGetId()), count);
-    osMutexRelease(uart_id);
-
-    osDelay(1000);  // bloqueio simulando D
-  }                 // while
-}  // thread1
-
-__NO_RETURN void thread2(void *arg) {
-  uint32_t count = 0;
-  uint32_t tick;
-
-  while (1) {
-    tick = osKernelGetTickCount();
-
-    count++;
-
-    osMutexAcquire(uart_id, osWaitForever);
-    UARTprintf("%s, job %d beg.\n", osThreadGetName(osThreadGetId()), count);
-    osMutexRelease(uart_id);
-
-    for (int d = 0; d < 10000; d++)
-      ;  // atraso de software simulando C
-
-    osMutexAcquire(uart_id, osWaitForever);
-    UARTprintf("%s, job %d end.\n", osThreadGetName(osThreadGetId()), count);
-    osMutexRelease(uart_id);
-
-    osDelayUntil(tick + 2000);  // bloqueio simulando T
-  }                             // while
-}  // thread2
+  }
+}
 
 void main(void) {
   UARTInit();
@@ -190,12 +139,10 @@ void main(void) {
 
   myKernelState();
 
-  thread1_id = osThreadNew(thread1, NULL, &thread1_attr);
-  thread2_id = osThreadNew(thread2, NULL, &thread2_attr);
   uart_id = osMutexNew(NULL);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 
   while (1)
     ;
-}  // main
+}
