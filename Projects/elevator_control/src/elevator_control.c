@@ -30,22 +30,6 @@ __NO_RETURN void osRtxIdleThread(void* argument) {
   }
 }
 
-void initialize() {
-  char input[16];
-
-  while (1) {
-    UARTgets(input, sizeof(input));
-    if (!strcmp(input, "initialized")) {
-      continue;
-    }
-
-    UARTprintf("er\r");
-    UARTprintf("cr\r");
-    UARTprintf("dr\r");
-    return;
-  }
-}
-
 void mainThread(void* arg) {
   osMutexAcquire(uart_id, osWaitForever);
   printKernelState();
@@ -54,17 +38,27 @@ void mainThread(void* arg) {
 
   char input[16];
 
-  // initialize();
-
   signal_t signal;
 
   while (1) {
+    osMutexAcquire(uart_id, osWaitForever);
     UARTgets(input, sizeof(input));
-    if (parseSignal(&signal, input) == -1) {
+    osMutexRelease(uart_id);
+
+    if (!parseSignal(&signal, input)) {
 #ifdef DEBUG
       printf("Error: Invalid signal %s\r", input);
 #endif
     }
+
+    switch (signal.code) {
+      case signal_system_initialized:
+        UARTprintf("er\r");
+        UARTprintf("cr\r");
+        UARTprintf("dr\r");
+        break;
+    }
+
     printSignal(&signal);
   }
 }

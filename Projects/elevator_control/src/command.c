@@ -1,3 +1,3 @@
 #include "command.h"
 
-void buildCommand(command_t command, char *command_string) {}
+bool buildCommand(command_t* command, char* command_string) { return true; }

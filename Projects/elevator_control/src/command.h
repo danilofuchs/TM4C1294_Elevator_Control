@@ -1,6 +1,8 @@
 #ifndef __COMMAND_H__
 #define __COMMAND_H__
 
+#include <stdbool.h>
+
 #include "elevator.h"
 
 typedef enum {
@@ -22,6 +24,7 @@ typedef struct {
 } command_t;
 
 // Builds a string with the command
-void buildCommand(command_t command, char *command_string);
+// Returns true if it was built successfully
+bool buildCommand(command_t* command, char* command_string);
 
 #endif
