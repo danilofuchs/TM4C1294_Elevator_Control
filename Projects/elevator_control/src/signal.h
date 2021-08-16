@@ -7,13 +7,13 @@
 #include "elevator.h"
 
 typedef enum {
+  signal_unknown,
   signal_system_initialized,
   signal_reached_floor,
   signal_doors_open,
   signal_doors_closed,
   signal_internal_button_pressed,
   signal_external_button_pressed,
-  signal_unknown,
 } signal_code_t;
 
 typedef struct {
@@ -24,6 +24,10 @@ typedef struct {
   // signal_internal_button_pressed or signal_external_button_pressed
   // -1 otherwise.
   int8_t floor;
+
+  // Available for signal_external_button_pressed,
+  // elevator_direction_unknown otherwise.
+  elevator_direction_t direction;
 } signal_t;
 
 // Tries to parse the signal from string.

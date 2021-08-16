@@ -47,7 +47,7 @@ void mainThread(void* arg) {
 
     if (!parseSignal(&signal, input)) {
 #ifdef DEBUG
-      printf("Error: Invalid signal %s\r", input);
+      printf("Error: Invalid signal %s\n", input);
 #endif
     }
 

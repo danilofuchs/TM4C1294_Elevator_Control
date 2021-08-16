@@ -7,7 +7,9 @@
 #include "utils/uartstdio.h"
 
 elevator_code_t parseElevatorCode(char code);
-signal_code_t parseSignalCode(char code);
+signal_code_t parseSignalCode(char *input);
+int8_t parseFloor(char *input, signal_code_t signal_code);
+elevator_direction_t parseDirection(char *input, signal_code_t signal_code);
 
 bool parseSignal(signal_t *signal, char *input) {
   if (strcmp(input, "initialized") == 0) {
@@ -36,7 +38,7 @@ bool parseSignal(signal_t *signal, char *input) {
     return false;
   }
 
-  signal_code_t signal_code = parseSignalCode(signal_code_c);
+  signal_code_t signal_code = parseSignalCode(input);
   if (signal_code == signal_unknown) {
 #ifdef DEBUG
     printf("Error: unknown signal code '%c' (%d)\n", signal_code_c,
@@ -45,9 +47,14 @@ bool parseSignal(signal_t *signal, char *input) {
     return false;
   }
 
+  int8_t floor = parseFloor(input, signal_code);
+
+  elevator_direction_t direction = parseDirection(input, signal_code);
+
   signal->elevator_code = elevator_code;
   signal->code = signal_code;
-  signal->floor = 0;
+  signal->floor = floor;
+  signal->direction = direction;
 
   return true;
 }
@@ -65,11 +72,44 @@ elevator_code_t parseElevatorCode(char code) {
   }
 }
 
-signal_code_t parseSignalCode(char code) { return signal_reached_floor; }
+signal_code_t parseSignalCode(char *input) {
+  char code = input[1];
+  switch (code) {
+    case 'A':
+      return signal_doors_open;
+    case 'F':
+      return signal_doors_closed;
+    case 'I':
+      return signal_internal_button_pressed;
+    case 'E':
+      return signal_external_button_pressed;
+  }
+  if (code >= '0' && code <= '9') {
+    return signal_reached_floor;
+  }
+  return signal_unknown;
+}
+
+int8_t parseFloor(char *input, signal_code_t signal_code) { return -1; }
+
+elevator_direction_t parseDirection(char *input, signal_code_t signal_code) {
+  if (signal_code == signal_external_button_pressed) {
+    // <0:elevator>E<2:dozens><3:units><4:direction>
+    char direction = input[4];
+    switch (direction) {
+      case 's':
+        return elevator_direction_up;
+      case 'd':
+        return elevator_direction_down;
+    }
+  }
+  return elevator_direction_unknown;
+}
 
 void printSignal(signal_t *signal) {
 #ifdef DEBUG
-  printf("Signal: elevator_code: %d, code: %d, floor: %d\n",
-         signal->elevator_code, signal->code, signal->floor);
+  // Compact form because printing a lot of data is slow
+  printf("S: c: %d, el: %d, fl: %d, dir: %d\n", signal->elevator_code,
+         signal->code, signal->floor, signal->direction);
 #endif
 }
