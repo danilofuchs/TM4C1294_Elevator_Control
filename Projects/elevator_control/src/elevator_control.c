@@ -13,12 +13,15 @@
 #include "signal.h"
 #include "uart.h"
 
-osThreadId_t main_thread_id;
+osThreadId_t main_thread_id, signal_reader_thread_id;
+osMessageQueueId_t signal_queue_id;
 osMutexId_t uart_read_id, uart_write_id;
 
 elevator_t elevator_left, elevator_center, elevator_right;
 
 const osThreadAttr_t main_thread_attr = {.name = "Main Thread"};
+const osThreadAttr_t signal_reader_thread_attr = {.name =
+                                                      "Signal Reader Thread"};
 
 void __error__(char* pcFilename, unsigned long ulLine) {
   printf("[ERROR driverlib]\nat %s:%d\n", pcFilename, ulLine);
@@ -64,24 +67,30 @@ void elevatorInit(elevator_t* elevator) {
   sendCommand(&command);
 }
 
-void readSignal(signal_t* signal) {
+void signalReaderThread(void* arg) {
   char input[16];
-  osMutexAcquire(uart_read_id, osWaitForever);
-  UARTgets(input, sizeof(input));
-  osMutexRelease(uart_read_id);
+  while (1) {
+    osMutexAcquire(uart_read_id, osWaitForever);
+    UARTgets(input, sizeof(input));
+    osMutexRelease(uart_read_id);
 
-  if (!signalParse(signal, input)) {
+    signal_t signal;
+    if (!signalParse(&signal, input)) {
 #ifdef DEBUG
-    printf("Error: Invalid signal %s\n", input);
+      printf("Error: Invalid signal %s\n", input);
 #endif
+    }
+
+    osMessageQueuePut(signal_queue_id, &signal, 0, osWaitForever);
   }
 }
 
 void mainThread(void* arg) {
-  signal_t signal;
+  init();
 
   while (1) {
-    readSignal(&signal);
+    signal_t signal;
+    osMessageQueueGet(signal_queue_id, &signal, 0, osWaitForever);
 
     switch (signal.code) {
       case signal_system_initialized:
@@ -102,9 +111,12 @@ void main(void) {
 
   if (osKernelGetState() == osKernelInactive) osKernelInitialize();
 
+  signal_queue_id = osMessageQueueNew(8, sizeof(signal_t), NULL);
   uart_read_id = osMutexNew(NULL);
   uart_write_id = osMutexNew(NULL);
   main_thread_id = osThreadNew(mainThread, NULL, &main_thread_attr);
+  signal_reader_thread_id =
+      osThreadNew(signalReaderThread, NULL, &signal_reader_thread_attr);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 
