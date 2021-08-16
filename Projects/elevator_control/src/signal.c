@@ -26,9 +26,8 @@ bool parseSignal(signal_t *signal, char *input) {
 #endif
     return false;
   }
-  char elevator_code_c = input[0];
-  char signal_code_c = input[1];
 
+  char elevator_code_c = input[0];
   elevator_code_t elevator_code = parseElevatorCode(elevator_code_c);
   if (elevator_code == elevator_unknown) {
 #ifdef DEBUG
@@ -38,6 +37,7 @@ bool parseSignal(signal_t *signal, char *input) {
     return false;
   }
 
+  char signal_code_c = input[1];
   signal_code_t signal_code = parseSignalCode(input);
   if (signal_code == signal_unknown) {
 #ifdef DEBUG
@@ -109,7 +109,7 @@ elevator_direction_t parseDirection(char *input, signal_code_t signal_code) {
 void printSignal(signal_t *signal) {
 #ifdef DEBUG
   // Compact form because printing a lot of data is slow
-  printf("S: c: %d, el: %d, fl: %d, dir: %d\n", signal->elevator_code,
-         signal->code, signal->floor, signal->direction);
+  printf("S: c: %d, el: %d, fl: %d, dir: %d\n", signal->code,
+         signal->elevator_code, signal->floor, signal->direction);
 #endif
 }

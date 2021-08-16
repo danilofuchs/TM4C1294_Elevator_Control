@@ -30,6 +30,15 @@ __NO_RETURN void osRtxIdleThread(void* argument) {
   }
 }
 
+void sendCommand(command_t* command) {
+  char string[16];
+  buildCommand(command, string);
+
+  osMutexAcquire(uart_id, osWaitForever);
+  UARTprintf(string);
+  osMutexRelease(uart_id);
+}
+
 void mainThread(void* arg) {
   osMutexAcquire(uart_id, osWaitForever);
   printKernelState();
@@ -53,9 +62,12 @@ void mainThread(void* arg) {
 
     switch (signal.code) {
       case signal_system_initialized:
-        UARTprintf("er\r");
-        UARTprintf("cr\r");
-        UARTprintf("dr\r");
+        sendCommand(&(command_t){.code = command_initialize,
+                                 .elevator_code = elevator_left});
+        sendCommand(&(command_t){.code = command_initialize,
+                                 .elevator_code = elevator_center});
+        sendCommand(&(command_t){.code = command_initialize,
+                                 .elevator_code = elevator_right});
         break;
     }
 
