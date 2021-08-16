@@ -13,15 +13,16 @@
 #include "signal.h"
 #include "uart.h"
 
-osThreadId_t main_thread_id, signal_reader_thread_id;
+osThreadId_t main_thread_id, signal_handler_thread_id, controller_thread_id;
 osMessageQueueId_t signal_queue_id;
 osMutexId_t uart_read_id, uart_write_id;
 
-elevator_t elevator_left, elevator_center, elevator_right;
-
 const osThreadAttr_t main_thread_attr = {.name = "Main Thread"};
-const osThreadAttr_t signal_reader_thread_attr = {.name =
-                                                      "Signal Reader Thread"};
+const osThreadAttr_t signal_handler_thread_attr = {
+    .name = "Signal Handler Thread", .priority = osPriorityAboveNormal};
+const osThreadAttr_t controller_thread_attr = {.name = "Controller Thread"};
+
+elevator_t elevator_left, elevator_center, elevator_right;
 
 void __error__(char* pcFilename, unsigned long ulLine) {
   printf("[ERROR driverlib]\nat %s:%d\n", pcFilename, ulLine);
@@ -33,20 +34,6 @@ __NO_RETURN void osRtxIdleThread(void* argument) {
   while (1) {
     asm("wfi");
   }
-}
-
-void init() {
-  osMutexAcquire(uart_write_id, osWaitForever);
-  printKernelState();
-  printThreadInfo();
-  osMutexRelease(uart_write_id);
-
-  elevator_left = (elevator_t){.code = elevator_code_left,
-                               .direction = elevator_direction_unknown};
-  elevator_center = (elevator_t){.code = elevator_code_center,
-                                 .direction = elevator_direction_unknown};
-  elevator_right = (elevator_t){.code = elevator_code_right,
-                                .direction = elevator_direction_unknown};
 }
 
 void sendCommand(command_t* command) {
@@ -67,7 +54,7 @@ void elevatorInit(elevator_t* elevator) {
   sendCommand(&command);
 }
 
-void signalReaderThread(void* arg) {
+void signalHandlerThread(void* arg) {
   char input[16];
   while (1) {
     osMutexAcquire(uart_read_id, osWaitForever);
@@ -85,11 +72,9 @@ void signalReaderThread(void* arg) {
   }
 }
 
-void mainThread(void* arg) {
-  init();
-
+void controllerThread(void* arg) {
+  signal_t signal;
   while (1) {
-    signal_t signal;
     osMessageQueueGet(signal_queue_id, &signal, 0, osWaitForever);
 
     switch (signal.code) {
@@ -104,6 +89,20 @@ void mainThread(void* arg) {
   }
 }
 
+void mainThread(void* arg) {
+  osMutexAcquire(uart_write_id, osWaitForever);
+  printKernelState();
+  printThreadInfo();
+  osMutexRelease(uart_write_id);
+
+  elevator_left = (elevator_t){.code = elevator_code_left,
+                               .direction = elevator_direction_unknown};
+  elevator_center = (elevator_t){.code = elevator_code_center,
+                                 .direction = elevator_direction_unknown};
+  elevator_right = (elevator_t){.code = elevator_code_right,
+                                .direction = elevator_direction_unknown};
+}
+
 void main(void) {
   UARTInit();
   printKernelInfo();
@@ -115,8 +114,10 @@ void main(void) {
   uart_read_id = osMutexNew(NULL);
   uart_write_id = osMutexNew(NULL);
   main_thread_id = osThreadNew(mainThread, NULL, &main_thread_attr);
-  signal_reader_thread_id =
-      osThreadNew(signalReaderThread, NULL, &signal_reader_thread_attr);
+  signal_handler_thread_id =
+      osThreadNew(signalHandlerThread, NULL, &signal_handler_thread_attr);
+  controller_thread_id =
+      osThreadNew(controllerThread, NULL, &controller_thread_attr);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 
