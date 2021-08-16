@@ -13,7 +13,7 @@ elevator_direction_t parseDirection(char *input, signal_code_t signal_code);
 
 bool signalParse(signal_t *signal, char *input) {
   if (strcmp(input, "initialized") == 0) {
-    signal->elevator_code = elevator_unknown;
+    signal->elevator_code = elevator_code_unknown;
     signal->code = signal_system_initialized;
     signal->floor = -1;
 
@@ -29,7 +29,7 @@ bool signalParse(signal_t *signal, char *input) {
 
   char elevator_code_c = input[0];
   elevator_code_t elevator_code = parseElevatorCode(elevator_code_c);
-  if (elevator_code == elevator_unknown) {
+  if (elevator_code == elevator_code_unknown) {
 #ifdef DEBUG
     printf("Error: unknown elevator code '%c' (%d)\n", elevator_code_c,
            elevator_code_c);
@@ -62,13 +62,13 @@ bool signalParse(signal_t *signal, char *input) {
 elevator_code_t parseElevatorCode(char code) {
   switch (code) {
     case 'e':
-      return elevator_left;
+      return elevator_code_left;
     case 'c':
-      return elevator_center;
+      return elevator_code_center;
     case 'd':
-      return elevator_right;
+      return elevator_code_right;
     default:
-      return elevator_unknown;
+      return elevator_code_unknown;
   }
 }
 

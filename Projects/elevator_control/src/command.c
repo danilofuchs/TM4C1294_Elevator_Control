@@ -6,7 +6,7 @@ char buildElevatorCode(elevator_code_t code);
 bool initialize(command_t* command, char* command_string);
 
 bool commandBuild(command_t* command, char* command_string) {
-  if (command->elevator_code == elevator_unknown) {
+  if (command->elevator_code == elevator_code_unknown) {
 #ifdef DEBUG
     printf("Error: Unknown elevator.\n");
 #endif
@@ -23,19 +23,19 @@ bool commandBuild(command_t* command, char* command_string) {
 
 char buildElevatorCode(elevator_code_t code) {
   switch (code) {
-    case elevator_left:
+    case elevator_code_left:
       return 'e';
-    case elevator_center:
+    case elevator_code_center:
       return 'c';
-    case elevator_right:
+    case elevator_code_right:
       return 'd';
   }
+  return NULL;
 }
 
 bool initialize(command_t* command, char* command_string) {
   int success = sprintf(command_string, "%cr\r",
-                        buildElevatorCode(command->elevator_code),
-                        command->elevator_code);
+                        buildElevatorCode(command->elevator_code));
 
   return success >= 0;
 }
