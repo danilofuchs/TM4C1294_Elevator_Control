@@ -25,6 +25,6 @@ typedef struct {
 
 // Builds a string with the command
 // Returns true if it was built successfully
-bool buildCommand(command_t* command, char* command_string);
+bool commandBuild(command_t* command, char* command_string);
 
 #endif

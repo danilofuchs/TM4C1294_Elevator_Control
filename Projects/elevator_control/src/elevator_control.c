@@ -14,7 +14,7 @@
 #include "uart.h"
 
 osThreadId_t main_thread_id;
-osMutexId_t uart_id;
+osMutexId_t uart_read_id, uart_write_id;
 
 const osThreadAttr_t main_thread_attr = {.name = "Main Thread"};
 
@@ -30,35 +30,40 @@ __NO_RETURN void osRtxIdleThread(void* argument) {
   }
 }
 
+void init() {
+  osMutexAcquire(uart_write_id, osWaitForever);
+  printKernelState();
+  printThreadInfo();
+  osMutexRelease(uart_write_id);
+}
+
 void sendCommand(command_t* command) {
   char string[16];
-  buildCommand(command, string);
+  commandBuild(command, string);
 
-  osMutexAcquire(uart_id, osWaitForever);
+  osMutexAcquire(uart_write_id, osWaitForever);
   UARTprintf(string);
-  osMutexRelease(uart_id);
+  osMutexRelease(uart_write_id);
+}
+
+void readSignal(signal_t* signal) {
+  char input[16];
+  osMutexAcquire(uart_read_id, osWaitForever);
+  UARTgets(input, sizeof(input));
+  osMutexRelease(uart_read_id);
+
+  if (!signalParse(signal, input)) {
+#ifdef DEBUG
+    printf("Error: Invalid signal %s\n", input);
+#endif
+  }
 }
 
 void mainThread(void* arg) {
-  osMutexAcquire(uart_id, osWaitForever);
-  printKernelState();
-  printThreadInfo();
-  osMutexRelease(uart_id);
-
-  char input[16];
-
   signal_t signal;
 
   while (1) {
-    osMutexAcquire(uart_id, osWaitForever);
-    UARTgets(input, sizeof(input));
-    osMutexRelease(uart_id);
-
-    if (!parseSignal(&signal, input)) {
-#ifdef DEBUG
-      printf("Error: Invalid signal %s\n", input);
-#endif
-    }
+    readSignal(&signal);
 
     switch (signal.code) {
       case signal_system_initialized:
@@ -71,7 +76,7 @@ void mainThread(void* arg) {
         break;
     }
 
-    printSignal(&signal);
+    signalDebug(&signal);
   }
 }
 
@@ -82,7 +87,8 @@ void main(void) {
 
   if (osKernelGetState() == osKernelInactive) osKernelInitialize();
 
-  uart_id = osMutexNew(NULL);
+  uart_read_id = osMutexNew(NULL);
+  uart_write_id = osMutexNew(NULL);
   main_thread_id = osThreadNew(mainThread, NULL, &main_thread_attr);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();

@@ -11,7 +11,7 @@ signal_code_t parseSignalCode(char *input);
 int8_t parseFloor(char *input, signal_code_t signal_code);
 elevator_direction_t parseDirection(char *input, signal_code_t signal_code);
 
-bool parseSignal(signal_t *signal, char *input) {
+bool signalParse(signal_t *signal, char *input) {
   if (strcmp(input, "initialized") == 0) {
     signal->elevator_code = elevator_unknown;
     signal->code = signal_system_initialized;
@@ -106,7 +106,7 @@ elevator_direction_t parseDirection(char *input, signal_code_t signal_code) {
   return elevator_direction_unknown;
 }
 
-void printSignal(signal_t *signal) {
+void signalDebug(signal_t *signal) {
 #ifdef DEBUG
   // Compact form because printing a lot of data is slow
   printf("S: c: %d, el: %d, fl: %d, dir: %d\n", signal->code,

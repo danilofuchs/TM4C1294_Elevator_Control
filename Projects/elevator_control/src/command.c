@@ -5,7 +5,7 @@
 char buildElevatorCode(elevator_code_t code);
 bool initialize(command_t* command, char* command_string);
 
-bool buildCommand(command_t* command, char* command_string) {
+bool commandBuild(command_t* command, char* command_string) {
   if (command->elevator_code == elevator_unknown) {
 #ifdef DEBUG
     printf("Error: Unknown elevator.\n");

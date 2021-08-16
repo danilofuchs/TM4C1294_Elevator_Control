@@ -32,8 +32,8 @@ typedef struct {
 
 // Tries to parse the signal from string.
 // Returns true if successful and populated the signal pointer, false otherwise.
-bool parseSignal(signal_t *signal, char *signal_string);
+bool signalParse(signal_t *signal, char *signal_string);
 
-void printSignal(signal_t *signal);
+void signalDebug(signal_t *signal);
 
 #endif
