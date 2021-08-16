@@ -5,6 +5,7 @@ typedef enum {
   elevator_left,
   elevator_center,
   elevator_right,
+  elevator_unknown,
 } elevator_code_t;
 
 #endif

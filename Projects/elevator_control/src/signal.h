@@ -11,6 +11,7 @@ typedef enum {
   signal_doors_closed,
   signal_internal_button_pressed,
   signal_external_button_pressed,
+  signal_unknown,
 } signal_code_t;
 
 typedef struct {

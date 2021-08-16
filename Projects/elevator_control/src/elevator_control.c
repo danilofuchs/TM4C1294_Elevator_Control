@@ -18,6 +18,10 @@ osMutexId_t uart_id;
 
 const osThreadAttr_t main_thread_attr = {.name = "Main Thread"};
 
+void __error__(char* pcFilename, unsigned long ulLine) {
+  printf("[ERROR driverlib]\nat %s:%d\n", pcFilename, ulLine);
+}
+
 __NO_RETURN void osRtxIdleThread(void* argument) {
   (void)argument;
 
@@ -43,6 +47,11 @@ void initialize() {
 }
 
 void mainThread(void* arg) {
+  osMutexAcquire(uart_id, osWaitForever);
+  printKernelState();
+  printThreadInfo();
+  osMutexRelease(uart_id);
+
   char input[16];
 
   // initialize();
@@ -52,7 +61,9 @@ void mainThread(void* arg) {
   while (1) {
     UARTgets(input, sizeof(input));
     if (parseSignal(&signal, input) == -1) {
-      UARTprintf("Error: Invalid signal %s\r", input);
+#ifdef DEBUG
+      printf("Error: Invalid signal %s\r", input);
+#endif
     }
     printSignal(&signal);
   }
@@ -65,12 +76,8 @@ void main(void) {
 
   if (osKernelGetState() == osKernelInactive) osKernelInitialize();
 
-  printKernelState();
-
   uart_id = osMutexNew(NULL);
   main_thread_id = osThreadNew(mainThread, NULL, &main_thread_attr);
-
-  printThreadInfo();
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 

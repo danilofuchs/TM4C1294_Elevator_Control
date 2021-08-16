@@ -212,6 +212,7 @@
                     <name>CCDefines</name>
                     <state>PART_TM4C1294NCPDT</state>
                     <state>UART_BUFFERED</state>
+                    <state>DEBUG</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
