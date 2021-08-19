@@ -2,75 +2,107 @@
 
 ## Entidades:
 
-- **Elevador:** Elevador individual. Contém porta, botões externos em cada andar
-  e botão interno para cada andar
+- **Elevador:** Elevador individual. Contém porta, botões externos para subida e descida
+  em cada andar e botão interno para cada andar
 
-- **Controlador:** Software que interage com o simulador e gerencia os elevadores
+- **Controlador:** Software que interage com o _simulador_ e gerencia os _elevadores_
 
-- **Simulador:** Simulação do sistema. Contém os elevadores, envia sinais e recebe comandos do simulador
+- **Simulador:** Simulação do sistema. Contém os _elevadores_, envia sinais e recebe comandos do _simulador_
+
+- **Usuário:** Programador, responsável por iniciar a simulação, gravar o software no dispositivo
+  e configurar a comunicacão entre eles
 
 ## Nomenclatura:
 
-- **Sinal:** Informação produzida pelo simulador e recebida pelo controlador
+- **Sinal:** Informação produzida pelo _simulador_ e recebida pelo _controlador_
 
-- **Comando:** Informação produzida pelo sistema, e recebida pelo simulador
+- **Comando:** Informação produzida pelo sistema, e recebida pelo _simulador_
 
-- **Requisição:** Quando um elevador é requisitado para atender um andar
+- **Requisição:** Quando um _elevador_ é requisitado para atender um andar
 
-- **Direção:** Direção de movimento do elevador. Subir/Descer
+- **Direção:** Direção de movimento do _elevador_. Subir/Descer
 
 # Requisitos funcionais
 
-## O sistema
+## Interface
 
-### RF1: O controlador deve interagir com o simulador através de Serial UART, atendendo as [especificações do simulador](../docs/simulator_spec.pdf)
+### RF1: O _controlador_ deve interagir com o _simulador_ através de Serial UART, atendendo as [especificações do _simulador_](../docs/simulator_spec.pdf)
 
-### RF2: O controlador deve gerenciar 3 elevadores simultaneamente
+### RF2: Após o início da simulação, o _usuário_ deve interagir com o sistema somente através do _simulador_
 
-- RF2.1: Cada elevador deve atender somente às requisições de sua coluna
+### RF3: Através do _simulador_, o _usuário_ pode efetuar as operações:
 
-### RF3: O controlador deve priorizar, em caso de múltiplas requisições a um mesmo elevador:
+- RF1.1: _Requisitar_ um _elevador_ específico em um andar, com direção de subida ou descida
+- RF1.2: _Requisitar_ deslocamento para um andar, através de botão interno no _elevador_
 
-- RF3.1: O elevador deve manter a direção de movimento atual (subindo, descendo)
-- RF3.2: O elevador deve atender requisições pendentes dos botões internos
-- RF3.3: O elevador deve atender a requisição mais perta
-- RF3.4: Em caso de empate, o elevador deve atender a requisição abaixo do seu andar
+## Funcionamento dos elevadores
 
-### RF4: O controlador deve respeitar os limites da simulação
+### RF4: Um _elevador_ deverá atender _requisições_ externas, embarcando passageiros nos andares requisitados
 
-- RF4.1: O controlador não deve permitir um elevador subir mais do que 15 andares
-- RF4.2: O controlador não deve permitir um elevador descer abaixo do andar 0 (térreo)
+### RF5: Um _elevador_ deverá atender _requisições_ internas, desembarcando passageiros nos andares selecionados
 
-## Ações do controlador
+### RF6: _Elevador_ deve respeitar limites do sistema
 
-### RF5: Controlador deve esperar sinal do simulador indicando que está inicializado
+- RF6.1: _Elevador_ não devem subir acima do 15º andar
+- RF6.2: _Elevador_ não devem descer abaixo do andar 0 (térreo)
 
-- RF5.1: Controlador deve inicializar cada elevador, abrindo portas no andar 0, após o sinal do simulador
+### RF7: As portas do _elevador_ devem ser abertas para permitir embarque e desembarque de passageiros
 
-### RF6: Controlador deverá monitorar sinais de chamadas e atendê-las de acordo com ordem de prioridades (RF3)
+- RF7.1: Portas devem ficar abertas por pelo menos 5 segundos
 
-### RF7: Controlador deve parar o elevador no ponto exato do alinhamento do andar quando atingir andar requisitado
+### RF8: _Elevador_ só poderá se movimentar com portas fechadas
 
-### RF8: Controlador deverá controlar abrimento e fechamento de portas dos elevadores
+### RF9: _Elevador_ deve fechar as portas após 5 segundos e manter-se parado caso não haja nenhuma _requisição_ pendente
 
-- RF8.1: O elevador deve abrir a porta após parar o elevador em um andar requisitado
-- RF8.2: Elevador deverá estar com portas fechadas antes de qualquer início de movimentação
-- RF8.3: Controlador deve esperar até fechamento completo antes de comandar movimentação
-- RF8.4: Elevador deve fechar as portas após 5 segundos e manter-se parado caso não haja nenhuma requisição pendente
+### RF10: _Elevador_ deverá acender luz do botão interno quando receber _sinal_ de _requisição_ interna
 
-### RF9: Controlador deve controlar luzes dos botões internos dos elevadores
-
-- RF9.1: Elevador deverá acender luz do botão interno quando receber sinal de requisição interna
-- RF9.2: Elevador deverá apagar todas as luzes acesas nos botões correspondentes ao andar, direção e elevador atual, quando atingir um andar requisitado
+### RF11: _Elevador_ deverá apagar todas as luzes acesas nos botões correspondentes ao andar, direção e _elevador_ atual, quando atingir um andar requisitado
 
 # Requisitos não funcionais
 
-### RNF1: Hardware do sistema deve ser baseado no microcontrolador TM4C1294
+### RNF1: O _controlador_ deve gerenciar 3 _elevadores_ simultaneamente
 
-### RNF2: Software deve ser desenvolvido em linguagem C
+### RNF2: Cada _elevador_ deve atender somente às _requisições_ de sua coluna
 
-### RNF3: Software Utilização da biblioteca TivaWare
+### RNF3: _Controlador_ deve buscar parar o _elevador_ no ponto exato do alinhamento do andar quando atingir andar requisitado
 
-### RNF4: Software deve utilizar o sistema operacional RTOS Keil RTX5
+### RNF4: O _controlador_ deve priorizar, em caso de múltiplas _requisições_ a um mesmo _elevador_:
 
-### RNF5: O ambiente de desenvolvimento do software deve ser o IAR EWARM versão 9
+- RF3.1: O _elevador_ deve manter a direção de movimento atual (subindo, descendo)
+- RF3.2: O _elevador_ deve atender _requisições_ pendentes dos botões internos
+- RF3.3: O _elevador_ deve atender a _requisição_ mais perta
+- RF3.4: Em caso de empate, o _elevador_ deve atender a _requisição_ abaixo do seu andar
+
+### RNF5: Um _elevador_ não precisa parar em um andar com _requisição_ externa caso esteja indo no sentido contrário da _requisição_
+
+### RNF6: O sistema deve informar o _usuário_ sobre erros através de uma interface independente da UART
+
+### RNF7: A comunicação do _controlador_ com o _simulador_ deve ser monitorável
+
+### RNF8: Um _elevador_ não deve apresentar falhas no atendimento de pelo menos 20 _requisições_
+
+### RNF9: Um _elevador_ deve ser capaz de atender uma sobrecarga de _requisições_
+
+# Restrições
+
+### R1: A comunicação se dará com baud rate de 115200bps
+
+### R2: Hardware do sistema deve ser baseado no microcontrolador TM4C1294
+
+### R3: Software deve ser desenvolvido em linguagem C
+
+### R4: Software deve utilizar a biblioteca TivaWare
+
+### R5: Software deve ser desenvolvido utilizando objetos do sistema operacional RTOS Keil RTX5
+
+### R6: O ambiente de desenvolvimento do software deve ser o IAR EWARM versão 9
+
+### R7: Software deve conter o mínimo de variáveis globais possíveis
+
+### R8: O sistema deve fazer uso de filas de mensagens
+
+### R9: O _controlador_ deve ser multi-threaded, com uma thread dedicada por _elevador_
+
+### R10: O sistema não precisa ser expansível para mais de 3 _elevadores_
+
+### R11: O sistema não precisa ser expansível para mais de 15 andares
