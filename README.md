@@ -22,6 +22,12 @@ You can download the trial version.
 
 The functional requirements are described in Portuguese here: [Requisitos](./requisitos)
 
+## Architecture
+
+### Block diagram
+
+![Architecture block diagram](./arquitetura/architecture.png)
+
 ## Simulator
 
 On the elevator simulator folder ([elevator_sim](./elevator_sim)) you can find an
