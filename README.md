@@ -6,15 +6,27 @@ Connects via Serial port with a simulator running on the host computer.
 
 ![Elevator simulator screenshot](./docs/elevator_sim.png)
 
-## Requirements
+## Running the project
 
-The requirements are described in Portuguese here: [Requisitorios](./requisitos)
+First, you need to [install IAR IDE version 9](https://www.iar.com/products/architectures/arm/iar-embedded-workbench-for-arm/).
+You can download the trial version.
+
+- Make sure you install all the `TI - Texas Instruments` drivers, such as `TI ICDI`.
+- Clone this repository
+- Open the `.eww` workspace in IAR
+- Set the active project as `elevator_control`
+- On the project settings, make sure the `Debugger` -> `Driver` option is set to `TI Stellaris`
+- Build the project in Debug mode and run it 🚀
+
+## Functional Requirements
+
+The functional requirements are described in Portuguese here: [Requisitos](./requisitos)
 
 ## Simulator
 
 On the elevator simulator folder ([elevator_sim](./elevator_sim)) you can find an
 .exe to run the simulator on Windows. This simulator was given to me on my Embedded
-Systems course at UTFPR
+Systems course at [UTFPR](https://utfpr.edu.br/)
 
 The specification for the protocol is on [simulator_spec.pdf (Portuguese)](./docs/simulator_spec.pdf)
 
