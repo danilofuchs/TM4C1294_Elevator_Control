@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "utils/uartstdio.h"
+#include "uart.h"
 
 elevator_code_t parseElevatorCode(char code);
 signal_code_t parseSignalCode(char *input);

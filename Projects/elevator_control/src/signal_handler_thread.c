@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "signal.h"
-#include "utils/uartstdio.h"
+#include "uart.h"
 
 void signalHandlerThread(void* arg) {
   signal_handler_thread_t* this = (signal_handler_thread_t*)arg;

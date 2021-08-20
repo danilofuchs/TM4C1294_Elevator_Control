@@ -2,7 +2,7 @@
 
 #include "command.h"
 #include "signal.h"
-#include "utils/uartstdio.h"
+#include "uart.h"
 
 static void sendCommand(command_t* command, osMutexId_t mutex) {
   char string[16];

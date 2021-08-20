@@ -4,11 +4,9 @@
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
 
-// Utils
-#include "utils/uartstdio.h"
-
 // Internal deps
 #include "controller_thread.h"
+#include "kernel_info.h"
 #include "main_thread.h"
 #include "signal.h"
 #include "signal_handler_thread.h"

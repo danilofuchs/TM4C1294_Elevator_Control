@@ -6,7 +6,7 @@
 #include "cmsis_os2.h"
 
 // Utils
-#include "utils/uartstdio.h"
+#include "uart.h"
 
 void printKernelInfo(void) {
   osVersion_t osv;
