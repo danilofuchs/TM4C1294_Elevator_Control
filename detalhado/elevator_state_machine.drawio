@@ -1,0 +1,114 @@
+<mxfile host="65bd71144e">
+    <diagram id="oifts4adpvqHhOhjiGYB" name="Page-1">
+        <mxGraphModel dx="1109" dy="502" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#FFFFFF" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="7" target="40" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="65" y="140" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7" value="" style="ellipse;fillColor=#000000;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="100" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Reached floor [floor is requested]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="17" target="26" edge="1">
+                    <mxGeometry x="0.0145" relative="1" as="geometry">
+                        <mxPoint x="555" y="312.5" as="sourcePoint"/>
+                        <mxPoint x="235" y="255" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="575" y="263"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="18" value="Request [internal] / turnButtonLightOn" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.008;entryY=0.148;entryDx=0;entryDy=0;exitX=0.997;exitY=0.144;exitDx=0;exitDy=0;exitPerimeter=0;entryPerimeter=0;" parent="1" source="13" target="16" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="470" y="220" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="13" value="Stopped" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="192.5" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="Moving" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="192.5" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="Reached floor [floor is not requested || other direction]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="16" source="17" target="16" edge="1">
+                    <mxGeometry x="0.3063" y="-10" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="160" y="40"/>
+                            <mxPoint x="160" y="-40"/>
+                            <mxPoint x="65" y="-40"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="17" value="entry / move(direction)&#10;exit / stop" style="fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacingLeft=5;" parent="16" vertex="1">
+                    <mxGeometry y="30" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="Doors closed [no pending requests]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="24" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="225" y="262.5" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="37" value="Doors closed [pending request]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="1" source="24" target="17" edge="1">
+                    <mxGeometry x="-0.2105" relative="1" as="geometry">
+                        <mxPoint x="500" y="270" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="390" y="365"/>
+                            <mxPoint x="390" y="253"/>
+                            <mxPoint x="500" y="253"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="24" value="Closing Doors" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="330" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="entry / closeDoors&#10;" style="fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacingLeft=5;" parent="24" vertex="1">
+                    <mxGeometry y="30" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="Doors opened" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="26" target="29" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="Opening Doors" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
+                    <mxGeometry x="510" y="420" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="entry / openDoors&#10;" style="fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacingLeft=5;" parent="26" vertex="1">
+                    <mxGeometry y="30" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" value="5 seconds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="28" target="25" edge="1">
+                    <mxGeometry x="0.2" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="225" y="450"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="28" value="Awaiting Passengers" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="415" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="do / turnButtonLightOff&#10;" style="fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacingLeft=5;" parent="28" vertex="1">
+                    <mxGeometry y="30" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="Initializing" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="80" width="130" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" value="entry / initialize&#10;entry / openDoors" style="fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacingLeft=5;" parent="40" vertex="1">
+                    <mxGeometry y="30" width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="41" target="13" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="Request [external]&amp;nbsp;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.022;entryY=0.134;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" parent="1" source="13" target="17" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="299.61" y="212.57999999999998" as="sourcePoint"/>
+                        <mxPoint x="501.03999999999996" y="212.86" as="targetPoint"/>
+                        <Array as="points"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

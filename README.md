@@ -28,6 +28,12 @@ The functional requirements are described in Portuguese here: [Requisitos](./req
 
 ![Architecture block diagram](./arquitetura/architecture.png)
 
+### State machine diagrams
+
+![](./detalhado/elevator_state_machine.png)
+
+[Other diagrams](./detalhado)
+
 ## Simulator
 
 On the elevator simulator folder ([elevator_sim](./elevator_sim)) you can find an
