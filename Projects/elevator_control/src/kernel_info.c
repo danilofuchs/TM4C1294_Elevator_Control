@@ -72,7 +72,8 @@ void printThreadInfo(void) {
 
   UARTprintf("Number of active threads: %d\n", number);
   for (int n = 0; n < number; n++) {
-    UARTprintf("  %s (priority %d) - ", osThreadGetName(threads[n]),
+    const char* thread_name = osThreadGetName(threads[n]);
+    UARTprintf("  %s (priority %d) - ", thread_name == NULL ? "?" : thread_name,
                osThreadGetPriority(threads[n]));
     printThreadState(threads[n]);
   }
