@@ -9,20 +9,24 @@
 
 // Internal deps
 #include "command.h"
+#include "controller_thread.h"
 #include "kernel_info.h"
 #include "signal.h"
+#include "signal_handler_thread.h"
 #include "uart.h"
 
-osThreadId_t main_thread_id, signal_handler_thread_id, controller_thread_id;
-osMessageQueueId_t signal_queue_id;
-osMutexId_t uart_read_id, uart_write_id;
+typedef struct {
+  elevator_t left_elevator, center_elevator, right_elevator;
+  osMessageQueueId_t signal_queue_id;
+  osMutexId_t uart_read_mutex_id, uart_write_mutex_id;
+  signal_handler_thread_t signal_handler_thread;
+  controller_thread_t controller_thread;
+} app_t;
 
+static app_t app;
+
+osThreadId_t main_thread_id;
 const osThreadAttr_t main_thread_attr = {.name = "Main Thread"};
-const osThreadAttr_t signal_handler_thread_attr = {
-    .name = "Signal Handler Thread", .priority = osPriorityAboveNormal};
-const osThreadAttr_t controller_thread_attr = {.name = "Controller Thread"};
-
-elevator_t elevator_left, elevator_center, elevator_right;
 
 void __error__(char* pcFilename, unsigned long ulLine) {
   printf("[ERROR driverlib]\nat %s:%d\n", pcFilename, ulLine);
@@ -36,71 +40,21 @@ __NO_RETURN void osRtxIdleThread(void* argument) {
   }
 }
 
-void sendCommand(command_t* command) {
-  char string[16];
-  commandBuild(command, string);
-
-  osMutexAcquire(uart_write_id, osWaitForever);
-  UARTprintf(string);
-  osMutexRelease(uart_write_id);
-}
-
-void elevatorInit(elevator_t* elevator) {
-  command_t command = {
-      .code = command_initialize,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command);
-}
-
-void signalHandlerThread(void* arg) {
-  char input[16];
-  while (1) {
-    osMutexAcquire(uart_read_id, osWaitForever);
-    UARTgets(input, sizeof(input));
-    osMutexRelease(uart_read_id);
-
-    signal_t signal;
-    if (!signalParse(&signal, input)) {
-#ifdef DEBUG
-      printf("Error: Invalid signal %s\n", input);
-#endif
-    }
-
-    osMessageQueuePut(signal_queue_id, &signal, 0, osWaitForever);
-  }
-}
-
-void controllerThread(void* arg) {
-  signal_t signal;
-  while (1) {
-    osMessageQueueGet(signal_queue_id, &signal, 0, osWaitForever);
-
-    switch (signal.code) {
-      case signal_system_initialized:
-        elevatorInit(&elevator_left);
-        elevatorInit(&elevator_center);
-        elevatorInit(&elevator_right);
-        break;
-    }
-
-    signalDebug(&signal);
-  }
-}
-
 void mainThread(void* arg) {
-  osMutexAcquire(uart_write_id, osWaitForever);
+  osMutexAcquire(app.uart_write_mutex_id, osWaitForever);
   printKernelState();
   printThreadInfo();
-  osMutexRelease(uart_write_id);
+  osMutexRelease(app.uart_write_mutex_id);
 
-  elevator_left = (elevator_t){.code = elevator_code_left,
-                               .direction = elevator_direction_unknown};
-  elevator_center = (elevator_t){.code = elevator_code_center,
-                                 .direction = elevator_direction_unknown};
-  elevator_right = (elevator_t){.code = elevator_code_right,
-                                .direction = elevator_direction_unknown};
+  app.left_elevator = (elevator_t){.code = elevator_code_left,
+                                   .direction = elevator_direction_unknown};
+  app.center_elevator = (elevator_t){.code = elevator_code_center,
+                                     .direction = elevator_direction_unknown};
+  app.right_elevator = (elevator_t){.code = elevator_code_right,
+                                    .direction = elevator_direction_unknown};
+
+  while (1)
+    ;
 }
 
 void main(void) {
@@ -110,14 +64,34 @@ void main(void) {
 
   if (osKernelGetState() == osKernelInactive) osKernelInitialize();
 
-  signal_queue_id = osMessageQueueNew(8, sizeof(signal_t), NULL);
-  uart_read_id = osMutexNew(NULL);
-  uart_write_id = osMutexNew(NULL);
+  app.signal_queue_id = osMessageQueueNew(
+      8, sizeof(signal_t), &(osMessageQueueAttr_t){.name = "Signal Queue"});
+
+  app.uart_read_mutex_id =
+      osMutexNew(&(osMutexAttr_t){.name = "UART Read Mutex"});
+  app.uart_write_mutex_id =
+      osMutexNew(&(osMutexAttr_t){.name = "UART Write Mutex"});
+
   main_thread_id = osThreadNew(mainThread, NULL, &main_thread_attr);
-  signal_handler_thread_id =
-      osThreadNew(signalHandlerThread, NULL, &signal_handler_thread_attr);
-  controller_thread_id =
-      osThreadNew(controllerThread, NULL, &controller_thread_attr);
+
+  app.signal_handler_thread = (signal_handler_thread_t){
+      .attr = {.name = "Signal Handler Thread"},
+      .args = {.queue_id = app.signal_queue_id,
+               .uart_read_mutex_id = app.uart_read_mutex_id},
+  };
+  app.signal_handler_thread.thread_id =
+      osThreadNew(signalHandlerThread, &app.signal_handler_thread,
+                  &app.signal_handler_thread.attr);
+
+  app.controller_thread = (controller_thread_t){
+      .attr = {.name = "Controller Thread"},
+      .args = {.left_elevator = &app.left_elevator,
+               .center_elevator = &app.center_elevator,
+               .right_elevator = &app.right_elevator,
+               .queue_id = app.signal_queue_id,
+               .uart_write_mutex_id = app.uart_write_mutex_id}};
+  app.controller_thread.thread_id = osThreadNew(
+      controllerThread, &app.controller_thread, &app.controller_thread.attr);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 
