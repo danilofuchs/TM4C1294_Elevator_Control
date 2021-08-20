@@ -13,6 +13,7 @@ void signalHandlerThread(void* arg) {
     osMutexAcquire(this->args.uart_read_mutex_id, osWaitForever);
     if (UARTPeek('\r') < 0) {
       osMutexRelease(this->args.uart_read_mutex_id);
+      osThreadYield();
       continue;
     }
 
@@ -27,5 +28,6 @@ void signalHandlerThread(void* arg) {
     }
 
     osMessageQueuePut(this->args.queue_id, &signal, 0, osWaitForever);
+    osThreadYield();
   }
 }
