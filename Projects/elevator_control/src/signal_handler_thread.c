@@ -28,6 +28,7 @@ void signalHandlerThread(void* arg) {
 #ifdef DEBUG
       printf("Error: Invalid signal %s\n", input);
 #endif
+      continue;
     }
 
     do {

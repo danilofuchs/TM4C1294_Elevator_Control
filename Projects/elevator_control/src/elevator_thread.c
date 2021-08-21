@@ -17,9 +17,10 @@ static void elevatorInit(elevator_t* elevator, osMutexId_t mutex) {
   command_t command = {
       .code = command_initialize,
       .elevator_code = elevator->code,
+      .floor = -1,
   };
 
-  sendCommand(mutex, &command);
+  sendCommand(&command, mutex);
 }
 
 void elevatorThread(void* arg) {

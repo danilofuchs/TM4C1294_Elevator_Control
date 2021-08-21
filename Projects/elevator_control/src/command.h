@@ -20,7 +20,10 @@ typedef enum {
 typedef struct {
   elevator_code_t elevator_code;
   command_code_t code;
-  char argument;  // Optional argument
+  // Required when command is command_turn_button_on,
+  // command_turn_button_off.
+  // -1 otherwise.
+  int8_t floor;  // Optional argument
 } command_t;
 
 // Builds a string with the command
