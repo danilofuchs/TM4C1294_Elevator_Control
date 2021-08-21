@@ -56,6 +56,26 @@ static bool stop(command_t* command, char* command_string) {
   return success >= 0;
 }
 
+static bool turnButtonOn(command_t* command, char* command_string,
+                         int8_t floor) {
+  if (floor < 0 || floor > 15) return false;
+  char button_code = 'a' + floor;
+  int success = sprintf(command_string, "%cL%c\r",
+                        buildElevatorCode(command->elevator_code), button_code);
+
+  return success >= 0;
+}
+
+static bool turnButtonOff(command_t* command, char* command_string,
+                          int8_t floor) {
+  if (floor < 0 || floor > 15) return false;
+  char button_code = 'a' + floor;
+  int success = sprintf(command_string, "%cD%c\r",
+                        buildElevatorCode(command->elevator_code), button_code);
+
+  return success >= 0;
+}
+
 bool commandBuild(command_t* command, char* command_string) {
   if (command->elevator_code == elevator_code_unknown) {
 #ifdef DEBUG
@@ -77,6 +97,10 @@ bool commandBuild(command_t* command, char* command_string) {
       return goDown(command, command_string);
     case command_stop:
       return stop(command, command_string);
+    case command_turn_button_on:
+      return turnButtonOn(command, command_string, command->floor);
+    case command_turn_button_off:
+      return turnButtonOff(command, command_string, command->floor);
   }
 
   return false;

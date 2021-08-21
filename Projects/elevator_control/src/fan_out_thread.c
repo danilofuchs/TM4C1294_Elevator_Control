@@ -20,10 +20,13 @@ static void fanOut(signal_t* signal, fan_out_thread_args_t* args) {
   switch (signal->elevator_code) {
     case elevator_code_left:
       putMessage(args->left_elevator_signal_queue, signal);
+      return;
     case elevator_code_center:
       putMessage(args->center_elevator_signal_queue, signal);
+      return;
     case elevator_code_right:
       putMessage(args->right_elevator_signal_queue, signal);
+      return;
   }
 }
 
