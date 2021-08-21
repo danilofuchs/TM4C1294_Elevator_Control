@@ -1059,9 +1059,6 @@
         <name>$PROJ_DIR$\src\elevator.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\elevator_control.c</name>
-    </file>
-    <file>
         <name>$PROJ_DIR$\src\elevator_thread.c</name>
     </file>
     <file>
@@ -1069,6 +1066,9 @@
     </file>
     <file>
         <name>$PROJ_DIR$\src\kernel_info.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\src\main.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\src\main_thread.c</name>

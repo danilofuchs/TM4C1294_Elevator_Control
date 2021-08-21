@@ -25,14 +25,21 @@
  * -----------------------------------------------------------------------------
  */
 
+#include <stdio.h>
+
 #include "cmsis_compiler.h"
 #include "rtx_os.h"
+
+void __error__(char *pcFilename, unsigned long ulLine) {
+  printf("[ERROR driverlib]\nat %s:%d\n", pcFilename, ulLine);
+}
 
 // OS Idle Thread
 __WEAK __NO_RETURN void osRtxIdleThread(void *argument) {
   (void)argument;
 
   for (;;) {
+    asm("wfi");
   }
 }
 
