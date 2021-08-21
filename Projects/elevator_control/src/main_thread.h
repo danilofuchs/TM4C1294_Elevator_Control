@@ -5,11 +5,7 @@
 #include "elevator.h"
 
 typedef struct {
-  osMutexId_t uart_write_mutex_id;
-
-  elevator_t* left_elevator;
-  elevator_t* center_elevator;
-  elevator_t* right_elevator;
+  osMutexId_t uart_write_mutex;
 } main_thread_args_t;
 
 typedef struct {

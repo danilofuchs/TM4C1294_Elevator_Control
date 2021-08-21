@@ -10,15 +10,18 @@ void signalHandlerThread(void* arg) {
 
   char input[16];
   while (1) {
-    osMutexAcquire(this->args.uart_read_mutex_id, osWaitForever);
+    osStatus_t status =
+        osMutexAcquire(this->args.uart_read_mutex, osWaitForever);
+    if (status != osOK) continue;
+
     if (UARTPeek('\r') < 0) {
-      osMutexRelease(this->args.uart_read_mutex_id);
+      osMutexRelease(this->args.uart_read_mutex);
       osThreadYield();
       continue;
     }
 
     UARTgets(input, sizeof(input));
-    osMutexRelease(this->args.uart_read_mutex_id);
+    osMutexRelease(this->args.uart_read_mutex);
 
     signal_t signal;
     if (!signalParse(&signal, input)) {
@@ -27,7 +30,9 @@ void signalHandlerThread(void* arg) {
 #endif
     }
 
-    osMessageQueuePut(this->args.queue_id, &signal, 0, osWaitForever);
+    do {
+      status = osMessageQueuePut(this->args.queue, &signal, 0, osWaitForever);
+    } while (status != osOK);
     osThreadYield();
   }
 }

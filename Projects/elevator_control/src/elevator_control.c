@@ -5,7 +5,9 @@
 #include "cmsis_os2.h"  // CMSIS-RTOS
 
 // Internal deps
-#include "controller_thread.h"
+#include "elevator.h"
+#include "elevator_thread.h"
+#include "fan_out_thread.h"
 #include "kernel_info.h"
 #include "main_thread.h"
 #include "signal.h"
@@ -13,13 +15,14 @@
 #include "uart.h"
 
 typedef struct {
-  elevator_t left_elevator, center_elevator, right_elevator;
-  osMessageQueueId_t signal_queue_id;
-  osMutexId_t uart_read_mutex_id, uart_write_mutex_id;
+  osMessageQueueId_t signal_queue;
+  osMutexId_t uart_read_mutex, uart_write_mutex;
 
   main_thread_t main_thread;
   signal_handler_thread_t signal_handler_thread;
-  controller_thread_t controller_thread;
+  fan_out_thread_t fan_out_thread;
+  elevator_thread_t left_elevator_thread, center_elevator_thread,
+      right_elevator_thread;
 } app_t;
 
 static app_t app;
@@ -43,43 +46,53 @@ void main(void) {
 
   if (osKernelGetState() == osKernelInactive) osKernelInitialize();
 
-  app.signal_queue_id = osMessageQueueNew(
+  app.signal_queue = osMessageQueueNew(
       8, sizeof(signal_t), &(osMessageQueueAttr_t){.name = "Signal Queue"});
 
-  app.uart_read_mutex_id =
-      osMutexNew(&(osMutexAttr_t){.name = "UART Read Mutex"});
-  app.uart_write_mutex_id =
+  app.uart_read_mutex = osMutexNew(&(osMutexAttr_t){.name = "UART Read Mutex"});
+  app.uart_write_mutex =
       osMutexNew(&(osMutexAttr_t){.name = "UART Write Mutex"});
 
   app.main_thread = (main_thread_t){
       .attr = {.name = "Main Thread"},
-      .args = {.uart_write_mutex_id = app.uart_write_mutex_id,
-               .left_elevator = &app.left_elevator,
-               .center_elevator = &app.center_elevator,
-               .right_elevator = &app.right_elevator},
+      .args = {.uart_write_mutex = app.uart_write_mutex},
   };
   app.main_thread.thread_id =
       osThreadNew(mainThread, &app.main_thread, &app.main_thread.attr),
 
   app.signal_handler_thread = (signal_handler_thread_t){
       .attr = {.name = "Signal Handler Thread"},
-      .args = {.queue_id = app.signal_queue_id,
-               .uart_read_mutex_id = app.uart_read_mutex_id},
+      .args = {.queue = app.signal_queue,
+               .uart_read_mutex = app.uart_read_mutex},
   };
   app.signal_handler_thread.thread_id =
       osThreadNew(signalHandlerThread, &app.signal_handler_thread,
                   &app.signal_handler_thread.attr);
 
-  app.controller_thread = (controller_thread_t){
-      .attr = {.name = "Controller Thread"},
-      .args = {.left_elevator = &app.left_elevator,
-               .center_elevator = &app.center_elevator,
-               .right_elevator = &app.right_elevator,
-               .queue_id = app.signal_queue_id,
-               .uart_write_mutex_id = app.uart_write_mutex_id},
+  app.left_elevator_thread = (elevator_thread_t){
+      .attr = {.name = "Left Elevator Thread"},
+      .args = {.code = elevator_code_left,
+               .queue = osMessageQueueNew(
+                   8, sizeof(signal_t),
+                   &(osMessageQueueAttr_t){.name = "Left Elevator Queue"}),
+               .uart_write_mutex = app.uart_write_mutex},
   };
-  app.controller_thread.thread_id = osThreadNew(
-      controllerThread, &app.controller_thread, &app.controller_thread.attr);
+  app.left_elevator_thread.thread_id =
+      osThreadNew(elevatorThread, &app.left_elevator_thread,
+                  &app.left_elevator_thread.attr);
+
+  app.fan_out_thread = (fan_out_thread_t){
+      .attr = {.name = "Fan-Out Thread"},
+      .args = {.incoming_signal_queue = app.signal_queue,
+               .left_elevator_signal_queue =
+                   app.left_elevator_thread.args.queue,
+               .center_elevator_signal_queue =
+                   app.center_elevator_thread.args.queue,
+               .right_elevator_signal_queue =
+                   app.right_elevator_thread.args.queue},
+  };
+  app.fan_out_thread.thread_id =
+      osThreadNew(fanOutThread, &app.fan_out_thread, &app.fan_out_thread.attr);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();
 
