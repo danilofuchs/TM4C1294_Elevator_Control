@@ -57,10 +57,11 @@ static void createSignalHandlerThread(app_t* app) {
 }
 
 static void createElevatorThread(app_t* app, elevator_thread_t* thread,
-                                 char* thread_name, char* queue_name) {
+                                 elevator_code_t code, char* thread_name,
+                                 char* queue_name) {
   *thread = (elevator_thread_t){
       .attr = {.name = thread_name},
-      .args = {.code = elevator_code_left,
+      .args = {.code = code,
                .queue = osMessageQueueNew(
                    8, sizeof(signal_t),
                    &(osMessageQueueAttr_t){.name = queue_name}),
@@ -94,11 +95,11 @@ void main(void) {
   createMutexes(&app);
   createMainThread(&app);
   createSignalHandlerThread(&app);
-  createElevatorThread(&app, &app.left_elevator_thread, "Left Elevator Thread",
-                       "Left Elevator Queue");
-  createElevatorThread(&app, &app.center_elevator_thread,
+  createElevatorThread(&app, &app.left_elevator_thread, elevator_code_left,
+                       "Left Elevator Thread", "Left Elevator Queue");
+  createElevatorThread(&app, &app.center_elevator_thread, elevator_code_center,
                        "Center Elevator Thread", "Center Elevator Queue");
-  createElevatorThread(&app, &app.right_elevator_thread,
+  createElevatorThread(&app, &app.right_elevator_thread, elevator_code_right,
                        "Right Elevator Thread", "Right Elevator Queue");
   createFanOutThread(&app);
 
