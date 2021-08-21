@@ -6,10 +6,86 @@
 
 #include "uart.h"
 
-elevator_code_t parseElevatorCode(char code);
-signal_code_t parseSignalCode(char *input);
-int8_t parseFloor(char *input, signal_code_t signal_code);
-elevator_direction_t parseDirection(char *input, signal_code_t signal_code);
+static bool isNumeric(char ch) { return ch >= '0' && ch <= '9'; }
+static uint8_t parseInt(char ch) { return ch - '0'; }
+
+static int8_t parseFloor(char *input, signal_code_t signal_code) {
+  if (signal_code == signal_reached_floor) {
+    // <0:elevator><1:dozens or units><2:units>
+    char dozensOrUnits = input[1];
+    char units = input[2];
+
+    if (isNumeric(units) && isNumeric(dozensOrUnits)) {
+      return 10 * parseInt(dozensOrUnits) + parseInt(units);
+    } else if (isNumeric(dozensOrUnits)) {
+      return parseInt(dozensOrUnits);
+    }
+    return -1;
+  } else if (signal_code == signal_external_button_pressed) {
+    // <0:elevator><1:code><2:dozens><3:units><4:direction>
+    char dozens = input[2];
+    char units = input[3];
+    if (isNumeric(dozens) && isNumeric(units)) {
+      return 10 * parseInt(dozens) + parseInt(units);
+    }
+    return -1;
+  } else if (signal_code == signal_internal_button_pressed) {
+    // <0:elevator><1:code><2:button_code>
+    // button_code is from 'a' to 'p'
+    char button_code = input[2];
+    if (button_code >= 'a' && button_code <= 'p') {
+      return button_code - 'a';
+    }
+    return -1;
+  }
+  return -1;
+}
+
+elevator_code_t parseElevatorCode(char code) {
+  switch (code) {
+    case 'e':
+      return elevator_code_left;
+    case 'c':
+      return elevator_code_center;
+    case 'd':
+      return elevator_code_right;
+    default:
+      return elevator_code_unknown;
+  }
+}
+
+signal_code_t parseSignalCode(char *input) {
+  char code = input[1];
+  switch (code) {
+    case 'A':
+      return signal_doors_open;
+    case 'F':
+      return signal_doors_closed;
+    case 'I':
+      return signal_internal_button_pressed;
+    case 'E':
+      return signal_external_button_pressed;
+  }
+  if (isNumeric(code)) {
+    return signal_reached_floor;
+  }
+  return signal_unknown;
+}
+
+static elevator_direction_t parseDirection(char *input,
+                                           signal_code_t signal_code) {
+  if (signal_code == signal_external_button_pressed) {
+    // <0:elevator><1:code><2:dozens><3:units><4:direction>
+    char direction = input[4];
+    switch (direction) {
+      case 's':
+        return elevator_direction_up;
+      case 'd':
+        return elevator_direction_down;
+    }
+  }
+  return elevator_direction_unknown;
+}
 
 bool signalParse(signal_t *signal, char *input) {
   if (strcmp(input, "initialized") == 0) {
@@ -57,53 +133,6 @@ bool signalParse(signal_t *signal, char *input) {
   signal->direction = direction;
 
   return true;
-}
-
-elevator_code_t parseElevatorCode(char code) {
-  switch (code) {
-    case 'e':
-      return elevator_code_left;
-    case 'c':
-      return elevator_code_center;
-    case 'd':
-      return elevator_code_right;
-    default:
-      return elevator_code_unknown;
-  }
-}
-
-signal_code_t parseSignalCode(char *input) {
-  char code = input[1];
-  switch (code) {
-    case 'A':
-      return signal_doors_open;
-    case 'F':
-      return signal_doors_closed;
-    case 'I':
-      return signal_internal_button_pressed;
-    case 'E':
-      return signal_external_button_pressed;
-  }
-  if (code >= '0' && code <= '9') {
-    return signal_reached_floor;
-  }
-  return signal_unknown;
-}
-
-int8_t parseFloor(char *input, signal_code_t signal_code) { return -1; }
-
-elevator_direction_t parseDirection(char *input, signal_code_t signal_code) {
-  if (signal_code == signal_external_button_pressed) {
-    // <0:elevator>E<2:dozens><3:units><4:direction>
-    char direction = input[4];
-    switch (direction) {
-      case 's':
-        return elevator_direction_up;
-      case 'd':
-        return elevator_direction_down;
-    }
-  }
-  return elevator_direction_unknown;
 }
 
 void signalDebug(signal_t *signal) {
