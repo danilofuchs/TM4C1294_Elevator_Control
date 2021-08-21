@@ -86,6 +86,17 @@ static void internalButtonWasPressed(elevator_t* elevator, int8_t floor,
 
   closeDoors(elevator, mutex);
 }
+static void externalButtonWasPressed(elevator_t* elevator, int8_t floor,
+                                     elevator_direction_t direction,
+                                     osMutexId_t mutex) {
+  if (direction == elevator_direction_up) {
+    elevator->external_requests_up[floor] = true;
+  } else if (direction == elevator_direction_down) {
+    elevator->external_requests_down[floor] = true;
+  }
+
+  closeDoors(elevator, mutex);
+}
 
 static void doorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
   elevator->door_state = elevator_door_state_closed;
@@ -117,6 +128,10 @@ void elevatorThread(void* arg) {
         break;
       case signal_internal_button_pressed:
         internalButtonWasPressed(&elevator, signal.floor, mutex);
+        break;
+      case signal_external_button_pressed:
+        externalButtonWasPressed(&elevator, signal.floor, signal.direction,
+                                 mutex);
         break;
       case signal_doors_closed:
         doorsAreClosed(&elevator, mutex);
