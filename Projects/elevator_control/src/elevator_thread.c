@@ -78,7 +78,17 @@ static void goUp(elevator_t* elevator, osMutexId_t mutex) {
   sendCommand(&command, mutex);
 }
 
+static void internalButtonWasPressed(elevator_t* elevator, int8_t floor,
+                                     osMutexId_t mutex) {
+  turnButtonOn(elevator, floor, mutex);
+
+  elevator->internal_requests[floor] = true;
+
+  closeDoors(elevator, mutex);
+}
+
 static void doorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->door_state = elevator_door_state_closed;
   goUp(elevator, mutex);
 }
 
@@ -90,7 +100,7 @@ void elevatorThread(void* arg) {
       .code = this->args.code,
       .state = elevator_state_uninitialized,
       .floor = 0,
-      .direction = elevator_direction_unknown,
+      .direction = elevator_direction_none,
       .door_state = elevator_door_state_closed,
   };
 
@@ -106,8 +116,7 @@ void elevatorThread(void* arg) {
         initialize(&elevator, mutex);
         break;
       case signal_internal_button_pressed:
-        turnButtonOn(&elevator, signal.floor, mutex);
-        closeDoors(&elevator, mutex);
+        internalButtonWasPressed(&elevator, signal.floor, mutex);
         break;
       case signal_doors_closed:
         doorsAreClosed(&elevator, mutex);

@@ -1,6 +1,11 @@
 #ifndef __ELEVATOR_H__
 #define __ELEVATOR_H__
 
+#include <stdbool.h>
+
+#define ELEVATOR_NUM_FLOORS 16
+#define ELEVATOR_MAX_NUM_REQUESTS ELEVATOR_NUM_FLOORS * 3
+
 typedef enum {
   elevator_code_unknown,
   elevator_code_left,
@@ -9,7 +14,7 @@ typedef enum {
 } elevator_code_t;
 
 typedef enum {
-  elevator_direction_unknown,
+  elevator_direction_none,
   elevator_direction_up,
   elevator_direction_down,
 } elevator_direction_t;
@@ -28,6 +33,12 @@ typedef enum {
   elevator_door_state_open,
 } elevator_door_state_t;
 
+typedef enum {
+  elevator_request_type_inactive,
+  elevator_request_type_internal,
+  elevator_request_type_external,
+} elevator_request_type_t;
+
 typedef struct {
   elevator_code_t code;
   elevator_state_t state;
@@ -35,6 +46,12 @@ typedef struct {
   int8_t floor;
   elevator_direction_t direction;
   elevator_door_state_t door_state;
+
+  bool internal_requests[ELEVATOR_NUM_FLOORS];
+  bool external_requests_up[ELEVATOR_NUM_FLOORS];
+  bool external_requests_down[ELEVATOR_NUM_FLOORS];
 } elevator_t;
+
+void elevatorNew(elevator_t* elevator, elevator_code_t code);
 
 #endif

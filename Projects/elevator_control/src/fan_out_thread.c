@@ -42,6 +42,6 @@ void fanOutThread(void* arg) {
 
     fanOut(&signal, &this->args);
 
-    signalDebug(&signal);
+    // signalDebug(&signal);
   }
 }

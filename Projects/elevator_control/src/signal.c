@@ -84,7 +84,7 @@ static elevator_direction_t parseDirection(char *input,
         return elevator_direction_down;
     }
   }
-  return elevator_direction_unknown;
+  return elevator_direction_none;
 }
 
 bool signalParse(signal_t *signal, char *input) {
