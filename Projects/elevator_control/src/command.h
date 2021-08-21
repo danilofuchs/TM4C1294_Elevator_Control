@@ -7,8 +7,8 @@
 
 typedef enum {
   command_initialize,
-  command_open_door,
-  command_close_door,
+  command_open_doors,
+  command_close_doors,
   command_go_up,
   command_go_down,
   command_stop,
