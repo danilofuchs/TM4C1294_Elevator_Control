@@ -47,12 +47,27 @@ static void turnButtonOff(elevator_t* elevator, int8_t floor,
   sendCommand(&command, mutex);
 }
 
-static void reachedFloor(elevator_t* elevator, int8_t floor,
-                         osMutexId_t mutex) {
-  if (floor < 0) return;
-  elevator->floor = floor;
+static void stop(elevator_t* elevator, osMutexId_t mutex) {
+  command_t command = {
+      .code = command_stop,
+      .elevator_code = elevator->code,
+      .floor = -1,
+  };
+
+  sendCommand(&command, mutex);
 }
 
+static void openDoors(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->state = elevator_state_opening_doors;
+
+  command_t command = {
+      .code = command_open_doors,
+      .elevator_code = elevator->code,
+      .floor = -1,
+  };
+
+  sendCommand(&command, mutex);
+}
 static void closeDoors(elevator_t* elevator, osMutexId_t mutex) {
   elevator->state = elevator_state_closing_doors;
 
@@ -76,6 +91,25 @@ static void goUp(elevator_t* elevator, osMutexId_t mutex) {
   };
 
   sendCommand(&command, mutex);
+}
+
+static void goDown(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->state = elevator_state_moving;
+  elevator->direction = elevator_direction_down;
+
+  command_t command = {
+      .code = command_go_down,
+      .elevator_code = elevator->code,
+      .floor = -1,
+  };
+
+  sendCommand(&command, mutex);
+}
+
+static void reachedFloor(elevator_t* elevator, int8_t floor,
+                         osMutexId_t mutex) {
+  if (floor < 0) return;
+  elevator->floor = floor;
 }
 
 static void internalButtonWasPressed(elevator_t* elevator, int8_t floor,
@@ -103,7 +137,20 @@ static void externalButtonWasPressed(elevator_t* elevator, int8_t floor,
 
 static void doorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
   elevator->door_state = elevator_door_state_closed;
-  goUp(elevator, mutex);
+  elevator_direction_t next_direction = elevatorGetNextDirection(elevator);
+  if (next_direction == elevator_direction_up) {
+    goUp(elevator, mutex);
+  } else if (next_direction == elevator_direction_down) {
+    goDown(elevator, mutex);
+  }
+}
+
+static void stopIfNecessary(elevator_t* elevator, uint8_t floor,
+                            osMutexId_t mutex) {
+  if (!elevatorShouldStopAtFloor(elevator, floor)) return;
+
+  stop(elevator, mutex);
+  openDoors(elevator, mutex);
 }
 
 void elevatorThread(void* arg) {
@@ -141,6 +188,7 @@ void elevatorThread(void* arg) {
         break;
       case signal_reached_floor:
         reachedFloor(&elevator, signal.floor, mutex);
+        stopIfNecessary(&elevator, signal.floor, mutex);
         break;
     }
   }

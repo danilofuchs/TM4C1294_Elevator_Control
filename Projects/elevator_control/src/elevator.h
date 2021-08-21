@@ -53,5 +53,7 @@ typedef struct {
 } elevator_t;
 
 bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor);
+bool elevatorShouldStopAtFloor(elevator_t *elevator, uint8_t floor);
+elevator_direction_t elevatorGetNextDirection(elevator_t *elevator);
 
 #endif
