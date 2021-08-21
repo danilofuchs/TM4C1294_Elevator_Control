@@ -52,6 +52,6 @@ typedef struct {
   bool external_requests_down[ELEVATOR_NUM_FLOORS];
 } elevator_t;
 
-void elevatorNew(elevator_t* elevator, elevator_code_t code);
+bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor);
 
 #endif

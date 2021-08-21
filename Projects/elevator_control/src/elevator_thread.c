@@ -80,12 +80,15 @@ static void goUp(elevator_t* elevator, osMutexId_t mutex) {
 
 static void internalButtonWasPressed(elevator_t* elevator, int8_t floor,
                                      osMutexId_t mutex) {
+  if (elevatorIsStoppedAtFloor(elevator, floor)) return;
+
   turnButtonOn(elevator, floor, mutex);
 
   elevator->internal_requests[floor] = true;
 
   closeDoors(elevator, mutex);
 }
+
 static void externalButtonWasPressed(elevator_t* elevator, int8_t floor,
                                      elevator_direction_t direction,
                                      osMutexId_t mutex) {
