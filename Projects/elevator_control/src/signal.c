@@ -7,7 +7,22 @@
 #include "uart.h"
 
 static bool isNumeric(char ch) { return ch >= '0' && ch <= '9'; }
-static uint8_t parseInt(char ch) { return ch - '0'; }
+static uint8_t parseIntFromChar(char ch) { return ch - '0'; }
+
+// Given a string representing a large integer,
+// return the integer value.
+//
+// The string should only contain digits.
+// Otherwise, returns 0.
+static uint32_t parseIntFromString(char *string) {
+  int length = strlen(string);
+  uint32_t height = 0;
+  for (int i = 0; i < length; i++) {
+    if (!isNumeric(string[i])) return 0;
+    height = height * 10 + parseIntFromChar(string[i]);
+  }
+  return height;
+}
 
 static int8_t parseFloor(char *input, signal_code_t signal_code) {
   if (signal_code == signal_reached_floor) {
@@ -16,9 +31,9 @@ static int8_t parseFloor(char *input, signal_code_t signal_code) {
     char units = input[2];
 
     if (isNumeric(units) && isNumeric(dozensOrUnits)) {
-      return 10 * parseInt(dozensOrUnits) + parseInt(units);
+      return 10 * parseIntFromChar(dozensOrUnits) + parseIntFromChar(units);
     } else if (isNumeric(dozensOrUnits)) {
-      return parseInt(dozensOrUnits);
+      return parseIntFromChar(dozensOrUnits);
     }
     return -1;
   } else if (signal_code == signal_external_button_pressed) {
@@ -26,7 +41,7 @@ static int8_t parseFloor(char *input, signal_code_t signal_code) {
     char dozens = input[2];
     char units = input[3];
     if (isNumeric(dozens) && isNumeric(units)) {
-      return 10 * parseInt(dozens) + parseInt(units);
+      return 10 * parseIntFromChar(dozens) + parseIntFromChar(units);
     }
     return -1;
   } else if (signal_code == signal_internal_button_pressed) {
@@ -55,6 +70,12 @@ elevator_code_t parseElevatorCode(char code) {
 }
 
 signal_code_t parseSignalCode(char *input) {
+  if (isNumeric(input[0])) {
+    return signal_height_changed;
+  }
+  if (isNumeric(input[1])) {
+    return signal_reached_floor;
+  }
   char code = input[1];
   switch (code) {
     case 'A':
@@ -66,9 +87,7 @@ signal_code_t parseSignalCode(char *input) {
     case 'E':
       return signal_external_button_pressed;
   }
-  if (isNumeric(code)) {
-    return signal_reached_floor;
-  }
+
   return signal_unknown;
 }
 
@@ -87,6 +106,14 @@ static elevator_direction_t parseDirection(char *input,
   return elevator_direction_none;
 }
 
+static uint32_t parseHeight(char *input, signal_code_t signal_code) {
+  if (signal_code != signal_height_changed) return 0;
+  // Signal is a numeric string and can be up to 75000
+  uint32_t height = parseIntFromString(input);
+
+  return height;
+}
+
 bool signalParse(signal_t *signal, char *input) {
   if (strcmp(input, "initialized") == 0) {
     signal->elevator_code = elevator_code_unknown;
@@ -95,10 +122,11 @@ bool signalParse(signal_t *signal, char *input) {
 
     return true;
   }
-  int signal_length = strlen(input);
-  if (signal_length < 2) {
+
+  signal_code_t signal_code = parseSignalCode(input);
+  if (signal_code == signal_unknown) {
 #ifdef DEBUG
-    printf("Error: signal string too short. Length: %d\n", signal_length);
+    printf("Error: unknown signal code\n");
 #endif
     return false;
   }
@@ -113,24 +141,17 @@ bool signalParse(signal_t *signal, char *input) {
     return false;
   }
 
-  char signal_code_c = input[1];
-  signal_code_t signal_code = parseSignalCode(input);
-  if (signal_code == signal_unknown) {
-#ifdef DEBUG
-    printf("Error: unknown signal code '%c' (%d)\n", signal_code_c,
-           signal_code_c);
-#endif
-    return false;
-  }
-
   int8_t floor = parseFloor(input, signal_code);
 
   elevator_direction_t direction = parseDirection(input, signal_code);
+
+  uint32_t height = parseHeight(input, signal_code);
 
   signal->elevator_code = elevator_code;
   signal->code = signal_code;
   signal->floor = floor;
   signal->direction = direction;
+  signal->height = height;
 
   return true;
 }
@@ -138,7 +159,8 @@ bool signalParse(signal_t *signal, char *input) {
 void signalDebug(signal_t *signal) {
 #ifdef DEBUG
   // Compact form because printing a lot of data is slow
-  printf("S: c: %d, el: %d, fl: %d, dir: %d\n", signal->code,
-         signal->elevator_code, signal->floor, signal->direction);
+  printf("S: c:%d;el:%d,fl:%d,dir:%d,h:%d\n", signal->code,
+         signal->elevator_code, signal->floor, signal->direction,
+         signal->height);
 #endif
 }

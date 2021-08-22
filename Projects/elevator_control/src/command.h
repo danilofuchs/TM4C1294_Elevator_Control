@@ -12,17 +12,17 @@ typedef enum {
   command_go_up,
   command_go_down,
   command_stop,
-  command_query_height,
   command_turn_button_on,
   command_turn_button_off,
+  command_query_height,
 } command_code_t;
 
 typedef struct {
   elevator_code_t elevator_code;
   command_code_t code;
+
   // Required when command is command_turn_button_on,
   // command_turn_button_off.
-  // -1 otherwise.
   int8_t floor;  // Optional argument
 } command_t;
 
