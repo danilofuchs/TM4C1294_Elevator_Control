@@ -5,6 +5,18 @@
 #include "signal.h"
 #include "uart.h"
 
+// Height change signal does not contain information about which elevator
+// has queried it, so we need to detect it by checking the current owner of the
+// height change mutex.
+static elevator_code_t findOutWhichElevatorQueriedHeight(
+    signal_handler_thread_args_t* args) {
+  osThreadId_t thread = osMutexGetOwner(args->height_query_mutex);
+
+  if (thread == NULL) return elevator_code_unknown;
+
+  return args->getElevatorCodeFromThreadId(thread);
+}
+
 void signalHandlerThread(void* arg) {
   signal_handler_thread_t* this = (signal_handler_thread_t*)arg;
 
@@ -29,6 +41,10 @@ void signalHandlerThread(void* arg) {
       printf("Error: Invalid signal %s\n", input);
 #endif
       continue;
+    }
+
+    if (signal.code == signal_height_changed) {
+      signal.elevator_code = findOutWhichElevatorQueriedHeight(&this->args);
     }
 
     do {

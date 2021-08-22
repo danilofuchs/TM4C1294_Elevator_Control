@@ -5,6 +5,8 @@
 
 #define ELEVATOR_NUM_FLOORS 16
 #define ELEVATOR_MAX_NUM_REQUESTS ELEVATOR_NUM_FLOORS * 3
+#define ELEVATOR_FLOOR_HEIGHT 5000
+#define ELEVATOR_FLOOR_TOLERANCY 100
 
 typedef enum {
   elevator_code_unknown,
@@ -44,6 +46,7 @@ typedef struct {
   elevator_state_t state;
 
   int8_t floor;
+  uint32_t height;
   elevator_direction_t direction;
   elevator_door_state_t door_state;
 
@@ -55,5 +58,6 @@ typedef struct {
 bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor);
 bool elevatorShouldStopAtFloor(elevator_t *elevator, uint8_t floor);
 elevator_direction_t elevatorGetNextDirection(elevator_t *elevator);
+int8_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator);
 
 #endif
