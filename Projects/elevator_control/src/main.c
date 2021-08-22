@@ -17,6 +17,7 @@
 typedef struct {
   osMessageQueueId_t signal_queue;
   osMutexId_t uart_read_mutex, uart_write_mutex;
+  osMutexId_t height_query_mutex;
 
   main_thread_t main_thread;
   signal_handler_thread_t signal_handler_thread;
@@ -27,11 +28,24 @@ typedef struct {
 
 static app_t app;
 
+elevator_code_t getElevatorCodeFromThreadId(osThreadId_t thread_id) {
+  if (thread_id == app.left_elevator_thread.thread_id)
+    return elevator_code_left;
+  if (thread_id == app.center_elevator_thread.thread_id)
+    return elevator_code_center;
+  if (thread_id == app.right_elevator_thread.thread_id)
+    return elevator_code_right;
+  return elevator_code_unknown;
+}
+
 static void createMutexes(app_t* app) {
   app->uart_read_mutex =
       osMutexNew(&(osMutexAttr_t){.name = "UART Read Mutex"});
   app->uart_write_mutex =
       osMutexNew(&(osMutexAttr_t){.name = "UART Write Mutex"});
+
+  app->height_query_mutex =
+      osMutexNew(&(osMutexAttr_t){.name = "Height Query Mutex"});
 }
 
 static void createMainThread(app_t* app) {
@@ -49,7 +63,9 @@ static void createSignalHandlerThread(app_t* app) {
   app->signal_handler_thread = (signal_handler_thread_t){
       .attr = {.name = "Signal Handler Thread"},
       .args = {.queue = app->signal_queue,
-               .uart_read_mutex = app->uart_read_mutex},
+               .uart_read_mutex = app->uart_read_mutex,
+               .height_query_mutex = app->height_query_mutex,
+               .getElevatorCodeFromThreadId = getElevatorCodeFromThreadId},
   };
   app->signal_handler_thread.thread_id =
       osThreadNew(signalHandlerThread, &app->signal_handler_thread,
@@ -65,7 +81,8 @@ static void createElevatorThread(app_t* app, elevator_thread_t* thread,
                .queue = osMessageQueueNew(
                    8, sizeof(signal_t),
                    &(osMessageQueueAttr_t){.name = queue_name}),
-               .uart_write_mutex = app->uart_write_mutex},
+               .uart_write_mutex = app->uart_write_mutex,
+               .height_query_mutex = app->height_query_mutex},
   };
   thread->thread_id = osThreadNew(elevatorThread, thread, &thread->attr);
 }

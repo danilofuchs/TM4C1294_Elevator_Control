@@ -44,6 +44,7 @@ typedef struct {
   elevator_state_t state;
 
   int8_t floor;
+  uint32_t height;
   elevator_direction_t direction;
   elevator_door_state_t door_state;
 
