@@ -159,9 +159,13 @@ static void stopIfNecessary(elevator_t* elevator, uint8_t floor,
 }
 
 static void heightChanged(elevator_t* elevator, uint32_t height,
-                          osMutexId_t height_query_mutex) {
+                          osMutexId_t height_query_mutex, osMutexId_t mutex) {
   osMutexRelease(height_query_mutex);
   elevator->height = height;
+  int8_t estimated_floor = elevatorGetEstimatedFloorGivenHeight(elevator);
+  if (estimated_floor != -1) {
+    stopIfNecessary(elevator, estimated_floor, mutex);
+  }
 }
 
 typedef struct {
@@ -236,7 +240,8 @@ void elevatorThread(void* arg) {
         queryHeight(&elevator, this->args.height_query_mutex, mutex);
         break;
       case signal_height_changed:
-        heightChanged(&elevator, signal.height, this->args.height_query_mutex);
+        heightChanged(&elevator, signal.height, this->args.height_query_mutex,
+                      mutex);
         break;
     }
   }

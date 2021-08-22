@@ -56,7 +56,8 @@ static int8_t parseFloor(char *input, signal_code_t signal_code) {
   return -1;
 }
 
-elevator_code_t parseElevatorCode(char code) {
+elevator_code_t parseElevatorCode(char *input) {
+  char code = input[0];
   switch (code) {
     case 'e':
       return elevator_code_left;
@@ -131,15 +132,7 @@ bool signalParse(signal_t *signal, char *input) {
     return false;
   }
 
-  char elevator_code_c = input[0];
-  elevator_code_t elevator_code = parseElevatorCode(elevator_code_c);
-  if (elevator_code == elevator_code_unknown) {
-#ifdef DEBUG
-    printf("Error: unknown elevator code '%c' (%d)\n", elevator_code_c,
-           elevator_code_c);
-#endif
-    return false;
-  }
+  elevator_code_t elevator_code = parseElevatorCode(input);
 
   int8_t floor = parseFloor(input, signal_code);
 

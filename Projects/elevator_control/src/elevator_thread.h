@@ -4,7 +4,7 @@
 #include "cmsis_os2.h"
 #include "elevator.h"
 
-#define ELEVATOR_THREAD_HEIGHT_QUERIER_PERIOD 1000
+#define ELEVATOR_THREAD_HEIGHT_QUERIER_PERIOD 500
 
 typedef struct {
   elevator_code_t code;

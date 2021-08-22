@@ -1,5 +1,6 @@
 #include "elevator.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor) {
@@ -62,4 +63,28 @@ elevator_direction_t elevatorGetNextDirection(elevator_t *elevator) {
     return elevator_direction_down;
   }
   return elevator_direction_none;
+}
+
+// Finds out if elevator is aligned with floor based on the current height.
+// Returns the floor if aligned, otherwise returns -1.
+int8_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator) {
+  float floor_fractions =
+      (float)elevator->height / (float)ELEVATOR_FLOOR_HEIGHT;
+
+  float fraction = modf(floor_fractions, NULL);
+
+  float tolerancy =
+      (float)ELEVATOR_FLOOR_HEIGHT / (float)ELEVATOR_FLOOR_TOLERANCY;
+
+  if (floor_fractions > tolerancy && floor_fractions < 1.0 - tolerancy) {
+    // We are between floors, so we are need to detect the floor that is closest
+    // to the current position
+    if (fraction < 0.5) {
+      return (int8_t)floor(floor_fractions);
+    } else {
+      return (int8_t)ceil(floor_fractions);
+    }
+  }
+
+  return -1;
 }
