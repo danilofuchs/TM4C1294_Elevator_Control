@@ -100,14 +100,31 @@ static void goDown(elevator_t* elevator, osMutexId_t mutex) {
   sendCommand(&command, mutex);
 }
 
-static void reachedFloor(elevator_t* elevator, int8_t floor,
-                         osMutexId_t mutex) {
-  if (floor < 0) return;
-  elevator->floor = floor;
+static void stopIfNecessary(elevator_t* elevator, uint8_t floor,
+                            osMutexId_t mutex) {
+  if (!elevatorShouldStopAtFloor(elevator, floor)) return;
+
+  stop(elevator, mutex);
+  turnButtonOff(elevator, floor, mutex);
+  openDoors(elevator, mutex);
 }
 
-static void internalButtonWasPressed(elevator_t* elevator, int8_t floor,
-                                     osMutexId_t mutex) {
+static void evInitialized(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->state = elevator_state_idle;
+
+  initialize(elevator, mutex);
+}
+
+static void evReachedFloor(elevator_t* elevator, int8_t floor,
+                           osMutexId_t mutex) {
+  if (floor < 0) return;
+  elevator->floor = floor;
+
+  stopIfNecessary(elevator, floor, mutex);
+}
+
+static void evInternalButtonWasPressed(elevator_t* elevator, int8_t floor,
+                                       osMutexId_t mutex) {
   if (elevatorIsStoppedAtFloor(elevator, floor)) return;
 
   turnButtonOn(elevator, floor, mutex);
@@ -117,9 +134,9 @@ static void internalButtonWasPressed(elevator_t* elevator, int8_t floor,
   closeDoors(elevator, mutex);
 }
 
-static void externalButtonWasPressed(elevator_t* elevator, int8_t floor,
-                                     elevator_direction_t direction,
-                                     osMutexId_t mutex) {
+static void evExternalButtonWasPressed(elevator_t* elevator, int8_t floor,
+                                       elevator_direction_t direction,
+                                       osMutexId_t mutex) {
   if (direction == elevator_direction_up) {
     elevator->external_requests_up[floor] = true;
   } else if (direction == elevator_direction_down) {
@@ -129,7 +146,7 @@ static void externalButtonWasPressed(elevator_t* elevator, int8_t floor,
   closeDoors(elevator, mutex);
 }
 
-static void doorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
+static void evDoorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
   elevator->door_state = elevator_door_state_closed;
   elevator_direction_t next_direction = elevatorGetNextDirection(elevator);
   if (next_direction == elevator_direction_up) {
@@ -139,16 +156,8 @@ static void doorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
   }
 }
 
-static void stopIfNecessary(elevator_t* elevator, uint8_t floor,
+static void evHeightChanged(elevator_t* elevator, uint32_t height,
                             osMutexId_t mutex) {
-  if (!elevatorShouldStopAtFloor(elevator, floor)) return;
-
-  stop(elevator, mutex);
-  openDoors(elevator, mutex);
-}
-
-static void heightChanged(elevator_t* elevator, uint32_t height,
-                          osMutexId_t mutex) {
   elevator->height = height;
   int8_t estimated_floor = elevatorGetEstimatedFloorGivenHeight(elevator);
   if (estimated_floor != -1) {
@@ -178,24 +187,23 @@ void elevatorThread(void* arg) {
 
     switch (signal.code) {
       case signal_system_initialized:
-        initialize(&elevator, mutex);
+        evInitialized(&elevator, mutex);
         break;
       case signal_internal_button_pressed:
-        internalButtonWasPressed(&elevator, signal.floor, mutex);
+        evInternalButtonWasPressed(&elevator, signal.floor, mutex);
         break;
       case signal_external_button_pressed:
-        externalButtonWasPressed(&elevator, signal.floor, signal.direction,
-                                 mutex);
+        evExternalButtonWasPressed(&elevator, signal.floor, signal.direction,
+                                   mutex);
         break;
       case signal_doors_closed:
-        doorsAreClosed(&elevator, mutex);
+        evDoorsAreClosed(&elevator, mutex);
         break;
       case signal_reached_floor:
-        reachedFloor(&elevator, signal.floor, mutex);
-        stopIfNecessary(&elevator, signal.floor, mutex);
+        evReachedFloor(&elevator, signal.floor, mutex);
         break;
       case signal_height_changed:
-        heightChanged(&elevator, signal.height, mutex);
+        evHeightChanged(&elevator, signal.height, mutex);
         break;
     }
   }
