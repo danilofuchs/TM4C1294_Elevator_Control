@@ -9,6 +9,8 @@ typedef struct {
   osMessageQueueId_t queue;
 
   osMessageQueueId_t left_elevator_queue;
+  osMessageQueueId_t center_elevator_queue;
+  osMessageQueueId_t right_elevator_queue;
 } height_checker_thread_args_t;
 
 typedef struct {

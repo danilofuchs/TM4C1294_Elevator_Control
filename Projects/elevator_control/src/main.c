@@ -90,6 +90,8 @@ static void createHeightCheckerThread(app_t* app) {
                   1, sizeof(signal_t),
                   &(osMessageQueueAttr_t){.name = "Height Checker Queue"}),
               .left_elevator_queue = app->left_elevator_thread.args.queue,
+              .center_elevator_queue = app->center_elevator_thread.args.queue,
+              .right_elevator_queue = app->right_elevator_thread.args.queue,
               .uart_write_mutex = app->uart_write_mutex,
           },
   };

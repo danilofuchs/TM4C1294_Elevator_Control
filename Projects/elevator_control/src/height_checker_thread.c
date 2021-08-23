@@ -7,6 +7,7 @@
 #define FLAG 0x01
 #define FREQUENCY 500
 #define TIMEOUT 200
+#define DONT_WAIT 0
 
 static void sendCommand(command_t* command, osMutexId_t mutex) {
   char string[16];
@@ -18,13 +19,32 @@ static void sendCommand(command_t* command, osMutexId_t mutex) {
   osMutexRelease(mutex);
 }
 
-static void sendQueryCommand(elevator_code_t elevator_code, osMutexId_t mutex) {
+static void queryAndWaitForReponse(elevator_code_t elevator_code,
+                                   height_checker_thread_args_t* args) {
   command_t command = {
       .code = command_query_height,
       .elevator_code = elevator_code,
   };
 
-  sendCommand(&command, mutex);
+  sendCommand(&command, args->uart_write_mutex);
+
+  signal_t signal;
+  osStatus_t status = osMessageQueueGet(args->queue, &signal, NULL, TIMEOUT);
+
+  if (status != osOK) {
+    // Probably timeout, we should ignore this query
+    return;
+  }
+
+  osMessageQueueId_t output_queue;
+  if (elevator_code == elevator_code_left) {
+    output_queue = args->left_elevator_queue;
+  } else if (elevator_code == elevator_code_center) {
+    output_queue = args->center_elevator_queue;
+  } else if (elevator_code == elevator_code_right) {
+    output_queue = args->right_elevator_queue;
+  }
+  osMessageQueuePut(output_queue, &signal, NULL, DONT_WAIT);
 }
 
 typedef struct {
@@ -50,8 +70,8 @@ void heightCheckerThread(void* arg) {
                            &(osTimerAttr_t){.name = "Height Checker Timer"});
   osTimerStart(this->timer, FREQUENCY);
 
-  signal_t signal;
   bool initialized = false;
+  signal_t signal;
 
   do {
     osMessageQueueGet(this->args.queue, &signal, NULL, osWaitForever);
@@ -62,8 +82,8 @@ void heightCheckerThread(void* arg) {
     osThreadFlagsWait(FLAG, osFlagsWaitAny, osWaitForever);
     osThreadFlagsClear(FLAG);
 
-    sendQueryCommand(elevator_code_left, this->args.uart_write_mutex);
-    osMessageQueueGet(this->args.queue, &signal, NULL, TIMEOUT);
-    osMessageQueuePut(this->args.left_elevator_queue, &signal, NULL, 0);
+    queryAndWaitForReponse(elevator_code_left, &this->args);
+    queryAndWaitForReponse(elevator_code_center, &this->args);
+    queryAndWaitForReponse(elevator_code_right, &this->args);
   }
 }
