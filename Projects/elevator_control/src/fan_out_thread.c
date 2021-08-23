@@ -14,6 +14,13 @@ static void fanOut(signal_t* signal, fan_out_thread_args_t* args) {
     putMessage(args->left_elevator_signal_queue, signal);
     putMessage(args->center_elevator_signal_queue, signal);
     putMessage(args->right_elevator_signal_queue, signal);
+    putMessage(args->height_checker_signal_queue, signal);
+    return;
+  }
+
+  if (signal->code == signal_height_changed) {
+    // Height change is handled by the height checker thread
+    putMessage(args->height_checker_signal_queue, signal);
     return;
   }
 

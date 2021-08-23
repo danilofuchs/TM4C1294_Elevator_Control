@@ -8,5 +8,15 @@
     "titleBar.activeForeground": "#cecece",
     "titleBar.inactiveBackground": "#23025f",
     "titleBar.inactiveForeground": "#cecece"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Debug": true,
+    "**/ewarm": true,
+    "**/settings": true
   }
 }

@@ -4,15 +4,9 @@
 #include "cmsis_os2.h"
 #include "elevator.h"
 
-typedef elevator_code_t (*getElevatorCodeFromThreadIdFunction)(
-    osThreadId_t threadId);
-
 typedef struct {
   osMessageQueueId_t queue;
   osMutexId_t uart_read_mutex;
-
-  osMutexId_t height_query_mutex;
-  getElevatorCodeFromThreadIdFunction getElevatorCodeFromThreadId;
 } signal_handler_thread_args_t;
 
 typedef struct {

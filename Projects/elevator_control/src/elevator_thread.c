@@ -100,17 +100,6 @@ static void goDown(elevator_t* elevator, osMutexId_t mutex) {
   sendCommand(&command, mutex);
 }
 
-static void queryHeight(elevator_t* elevator, osMutexId_t height_query_mutex,
-                        osMutexId_t mutex) {
-  command_t command = {
-      .code = command_query_height,
-      .elevator_code = elevator->code,
-  };
-
-  osMutexAcquire(height_query_mutex, osWaitForever);
-  sendCommand(&command, mutex);
-}
-
 static void reachedFloor(elevator_t* elevator, int8_t floor,
                          osMutexId_t mutex) {
   if (floor < 0) return;
@@ -159,33 +148,12 @@ static void stopIfNecessary(elevator_t* elevator, uint8_t floor,
 }
 
 static void heightChanged(elevator_t* elevator, uint32_t height,
-                          osMutexId_t height_query_mutex, osMutexId_t mutex) {
-  osMutexRelease(height_query_mutex);
+                          osMutexId_t mutex) {
   elevator->height = height;
   int8_t estimated_floor = elevatorGetEstimatedFloorGivenHeight(elevator);
   if (estimated_floor != -1) {
     stopIfNecessary(elevator, estimated_floor, mutex);
   }
-}
-
-typedef struct {
-  elevator_t* elevator;
-  osMessageQueueId_t queue;
-} height_querier_callback_args_t;
-
-void heightQuerier(void* arg) {
-  height_querier_callback_args_t* args = (height_querier_callback_args_t*)arg;
-
-  if (args->elevator->state != elevator_state_moving) return;
-
-  signal_t signal = {
-      .code = signal__internal__should_query_height,
-      .elevator_code = args->elevator->code,
-      .direction = elevator_direction_none,
-      .floor = -1,
-      .height = 0,
-  };
-  osMessageQueuePut(args->queue, &signal, 0, 0);
 }
 
 void elevatorThread(void* arg) {
@@ -200,16 +168,6 @@ void elevatorThread(void* arg) {
       .direction = elevator_direction_none,
       .door_state = elevator_door_state_closed,
   };
-
-  this->height_querier_timer =
-      osTimerNew(heightQuerier, osTimerPeriodic,
-                 &(height_querier_callback_args_t){
-                     .elevator = &elevator,
-                     .queue = this->args.queue,
-                 },
-                 &(osTimerAttr_t){.name = "Height Querier Timer"});
-  osTimerStart(this->height_querier_timer,
-               ELEVATOR_THREAD_HEIGHT_QUERIER_PERIOD);
 
   signal_t signal;
   while (1) {
@@ -236,12 +194,8 @@ void elevatorThread(void* arg) {
         reachedFloor(&elevator, signal.floor, mutex);
         stopIfNecessary(&elevator, signal.floor, mutex);
         break;
-      case signal__internal__should_query_height:
-        queryHeight(&elevator, this->args.height_query_mutex, mutex);
-        break;
       case signal_height_changed:
-        heightChanged(&elevator, signal.height, this->args.height_query_mutex,
-                      mutex);
+        heightChanged(&elevator, signal.height, mutex);
         break;
     }
   }

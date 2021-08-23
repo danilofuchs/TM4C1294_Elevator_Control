@@ -12,17 +12,11 @@ typedef struct {
   osMutexId_t uart_write_mutex;
 
   osMessageQueueId_t queue;
-
-  osTimerId_t height_query_mutex;
 } elevator_thread_args_t;
 
 typedef struct {
   osThreadId_t thread_id;
   osThreadAttr_t attr;
-
-  // Created internally
-  osTimerId_t height_querier_timer;
-
   elevator_thread_args_t args;
 } elevator_thread_t;
 
