@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
+#include "global_defines.h"
 
 // Internal deps
 #include "elevator.h"

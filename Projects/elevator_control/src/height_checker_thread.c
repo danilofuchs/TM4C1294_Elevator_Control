@@ -2,6 +2,7 @@
 
 #include "command.h"
 #include "elevator.h"
+#include "global_defines.h"
 #include "signal.h"
 
 #define FLAG 0x01
@@ -68,7 +69,9 @@ void heightCheckerThread(void* arg) {
                                .thread = &this->thread_id,
                            },
                            &(osTimerAttr_t){.name = "Height Checker Timer"});
+#if USE_HEIGHT_CHECKER == 1
   osTimerStart(this->timer, FREQUENCY);
+#endif
 
   bool initialized = false;
   signal_t signal;
