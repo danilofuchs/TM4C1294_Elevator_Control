@@ -451,7 +451,7 @@
                 </option>
                 <option>
                     <name>CCStackProtection</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
             </data>
         </settings>
@@ -1090,6 +1090,9 @@
     </file>
     <file>
         <name>$PROJ_DIR$\src\signal_handler_thread.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\src\stack_protection.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\src\startup_TM4C1294.s</name>
