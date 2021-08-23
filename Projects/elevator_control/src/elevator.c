@@ -31,6 +31,21 @@ static bool hasRequestForFloor(elevator_t *elevator, uint8_t floor) {
          elevator->external_requests_up[floor];
 }
 
+static bool hasRequestAbove(elevator_t *elevator) {
+  for (int8_t floor = elevator->floor + 1; floor <= ELEVATOR_NUM_FLOORS;
+       floor++) {
+    if (hasRequestForFloor(elevator, floor)) return true;
+  }
+  return false;
+}
+
+static bool hasRequestBelow(elevator_t *elevator) {
+  for (int8_t floor = elevator->floor - 1; floor >= 0; floor--) {
+    if (hasRequestForFloor(elevator, floor)) return true;
+  }
+  return false;
+}
+
 static uint8_t getClosestRequestedFloor(elevator_t *elevator) {
   int8_t closest_floor = 0;
   uint8_t closest_distance = UINT8_MAX;
@@ -45,16 +60,23 @@ static uint8_t getClosestRequestedFloor(elevator_t *elevator) {
     if (distance < closest_distance) {
       closest_floor = floor;
       closest_distance = distance;
+    } else {
+      break;
     }
   }
   return closest_floor;
 }
 
 elevator_direction_t elevatorGetNextDirection(elevator_t *elevator) {
-  if (elevator->direction != elevator_direction_none) {
-    // Already moving, should keep direction
-    return elevator->direction;
+  if (elevator->direction == elevator_direction_up &&
+      hasRequestAbove(elevator)) {
+    return elevator_direction_up;
   }
+  if (elevator->direction == elevator_direction_down &&
+      hasRequestBelow(elevator)) {
+    return elevator_direction_down;
+  }
+
   uint8_t closest_request = getClosestRequestedFloor(elevator);
 
   if (elevator->floor < closest_request) {

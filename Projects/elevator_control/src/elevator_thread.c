@@ -100,13 +100,42 @@ static void goDown(elevator_t* elevator, osMutexId_t mutex) {
   sendCommand(&command, mutex);
 }
 
+static void clearRequestsToFloorAndDirection(elevator_t* elevator) {
+  elevator->internal_requests[elevator->floor] = false;
+  if (elevator->direction == elevator_direction_up) {
+    elevator->external_requests_up[elevator->floor] = false;
+  } else if (elevator->direction == elevator_direction_down) {
+    elevator->external_requests_down[elevator->floor] = false;
+  }
+}
+
 static void stopIfNecessary(elevator_t* elevator, uint8_t floor,
                             osMutexId_t mutex) {
   if (!elevatorShouldStopAtFloor(elevator, floor)) return;
 
   stop(elevator, mutex);
-  turnButtonOff(elevator, floor, mutex);
+  clearRequestsToFloorAndDirection(elevator);
   openDoors(elevator, mutex);
+}
+
+static void moveToAtendRequests(elevator_t* elevator, osMutexId_t mutex) {
+  if (elevator->state == elevator_state_moving) return;
+
+  if (elevator->door_state != elevator_door_state_closed) {
+    // Must wait for doors to close before moving.
+    // Close doors will call this function again.
+    closeDoors(elevator, mutex);
+    return;
+  }
+
+  elevator_direction_t next_direction = elevatorGetNextDirection(elevator);
+  if (next_direction == elevator_direction_up) {
+    goUp(elevator, mutex);
+  } else if (next_direction == elevator_direction_down) {
+    goDown(elevator, mutex);
+  } else {
+    elevator->state = elevator_state_idle;
+  }
 }
 
 static void evInitialized(elevator_t* elevator, osMutexId_t mutex) {
@@ -125,35 +154,49 @@ static void evReachedFloor(elevator_t* elevator, int8_t floor,
 
 static void evInternalButtonWasPressed(elevator_t* elevator, int8_t floor,
                                        osMutexId_t mutex) {
-  if (elevatorIsStoppedAtFloor(elevator, floor)) return;
+  if (elevatorIsStoppedAtFloor(elevator, floor)) {
+    openDoors(elevator, mutex);
+    return;
+  };
 
   turnButtonOn(elevator, floor, mutex);
 
   elevator->internal_requests[floor] = true;
 
-  closeDoors(elevator, mutex);
+  moveToAtendRequests(elevator, mutex);
 }
 
 static void evExternalButtonWasPressed(elevator_t* elevator, int8_t floor,
                                        elevator_direction_t direction,
                                        osMutexId_t mutex) {
+  bool shouldOpenDoors = elevatorIsStoppedAtFloor(elevator, floor) &&
+                         (elevator->direction == direction ||
+                          elevator->state == elevator_state_idle);
+  if (shouldOpenDoors) {
+    openDoors(elevator, mutex);
+    return;
+  };
   if (direction == elevator_direction_up) {
     elevator->external_requests_up[floor] = true;
   } else if (direction == elevator_direction_down) {
     elevator->external_requests_down[floor] = true;
   }
 
-  closeDoors(elevator, mutex);
+  moveToAtendRequests(elevator, mutex);
 }
 
 static void evDoorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
   elevator->door_state = elevator_door_state_closed;
-  elevator_direction_t next_direction = elevatorGetNextDirection(elevator);
-  if (next_direction == elevator_direction_up) {
-    goUp(elevator, mutex);
-  } else if (next_direction == elevator_direction_down) {
-    goDown(elevator, mutex);
-  }
+  moveToAtendRequests(elevator, mutex);
+}
+
+static void evDoorsAreOpen(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->door_state = elevator_door_state_open;
+  turnButtonOff(elevator, elevator->floor, mutex);
+  elevator->state = elevator_state_awaiting_passengers;
+  // TODO: Fire a timer to close the doors after a certain amount of time.
+  osDelay(5000);
+  closeDoors(elevator, mutex);
 }
 
 static void evHeightChanged(elevator_t* elevator, uint32_t height,
@@ -198,6 +241,9 @@ void elevatorThread(void* arg) {
         break;
       case signal_doors_closed:
         evDoorsAreClosed(&elevator, mutex);
+        break;
+      case signal_doors_open:
+        evDoorsAreOpen(&elevator, mutex);
         break;
       case signal_reached_floor:
         evReachedFloor(&elevator, signal.floor, mutex);
