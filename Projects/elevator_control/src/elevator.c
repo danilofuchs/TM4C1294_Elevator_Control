@@ -69,10 +69,10 @@ elevator_direction_t elevatorGetNextDirection(elevator_t *elevator) {
 // Returns the floor if aligned, otherwise returns -1.
 int8_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator) {
   double floor_fractions =
-      (float)elevator->height / (float)ELEVATOR_FLOOR_HEIGHT;
+      (double)elevator->height / (double)ELEVATOR_FLOOR_HEIGHT;
 
-  double _integer;
-  double fraction = modf(floor_fractions, &_integer);
+  double _integer_part;
+  double fraction = modf(floor_fractions, &_integer_part);
 
   double tolerancy =
       (double)ELEVATOR_FLOOR_HEIGHT / (double)ELEVATOR_FLOOR_TOLERANCY;

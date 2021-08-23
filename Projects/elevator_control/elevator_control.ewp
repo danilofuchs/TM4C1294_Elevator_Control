@@ -213,6 +213,7 @@
                     <state>PART_TM4C1294NCPDT</state>
                     <state>UART_BUFFERED</state>
                     <state>DEBUG</state>
+                    <state>__FPU_USED=1</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
