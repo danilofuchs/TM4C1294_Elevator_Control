@@ -3,13 +3,11 @@
 #include <string.h>
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
-#include "global_defines.h"
 
 // Internal deps
 #include "elevator.h"
 #include "elevator_thread.h"
 #include "fan_out_thread.h"
-#include "height_checker_thread.h"
 #include "kernel_info.h"
 #include "main_thread.h"
 #include "signal.h"
@@ -26,7 +24,6 @@ typedef struct {
   fan_out_thread_t fan_out_thread;
   elevator_thread_t left_elevator_thread, center_elevator_thread,
       right_elevator_thread;
-  height_checker_thread_t height_checker_thread;
 } app_t;
 
 static app_t app;
@@ -83,25 +80,6 @@ static void createElevatorThread(app_t* app, elevator_thread_t* thread,
   thread->thread_id = osThreadNew(elevatorThread, thread, &thread->attr);
 }
 
-static void createHeightCheckerThread(app_t* app) {
-  app->height_checker_thread = (height_checker_thread_t){
-      .attr = {.name = "Height Checker Thread"},
-      .args =
-          {
-              .queue = osMessageQueueNew(
-                  1, sizeof(signal_t),
-                  &(osMessageQueueAttr_t){.name = "Height Checker Queue"}),
-              .left_elevator_queue = app->left_elevator_thread.args.queue,
-              .center_elevator_queue = app->center_elevator_thread.args.queue,
-              .right_elevator_queue = app->right_elevator_thread.args.queue,
-              .uart_write_mutex = app->uart_write_mutex,
-          },
-  };
-  app->height_checker_thread.thread_id =
-      osThreadNew(heightCheckerThread, &app->height_checker_thread,
-                  &app->height_checker_thread.attr);
-}
-
 static void createFanOutThread(app_t* app) {
   app->fan_out_thread = (fan_out_thread_t){
       .attr = {.name = "Fan-Out Thread"},
@@ -114,8 +92,6 @@ static void createFanOutThread(app_t* app) {
                   app->center_elevator_thread.args.queue,
               .right_elevator_signal_queue =
                   app->right_elevator_thread.args.queue,
-              .height_checker_signal_queue =
-                  app->height_checker_thread.args.queue,
           },
   };
   app->fan_out_thread.thread_id = osThreadNew(
@@ -138,7 +114,6 @@ void main(void) {
                        "Center Elevator Thread", "Center Elevator Queue");
   createElevatorThread(&app, &app.right_elevator_thread, elevator_code_right,
                        "Right Elevator Thread", "Right Elevator Queue");
-  createHeightCheckerThread(&app);
   createFanOutThread(&app);
 
   if (osKernelGetState() == osKernelReady) osKernelStart();

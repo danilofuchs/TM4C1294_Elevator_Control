@@ -14,8 +14,7 @@ typedef enum {
   signal_doors_closed,
   signal_internal_button_pressed,
   signal_external_button_pressed,
-  signal_height_changed,
-  signal__internal__should_query_height,
+  signal__internal__should_close_doors,
 } signal_code_t;
 
 typedef struct {
@@ -25,15 +24,11 @@ typedef struct {
   // Available when signal is signal_reached_floor,
   // signal_internal_button_pressed or signal_external_button_pressed
   // -1 otherwise.
-  int8_t floor;
+  floor_t floor;
 
   // Available for signal_external_button_pressed,
   // elevator_direction_unknown otherwise.
   elevator_direction_t direction;
-
-  // Available for signal_height_query_complete,
-  // 0 otherwise.
-  uint32_t height;
 } signal_t;
 
 // Tries to parse the signal from string.

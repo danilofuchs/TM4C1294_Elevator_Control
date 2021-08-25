@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "cmsis_os2.h"
 #include "elevator.h"
 
 typedef enum {
@@ -14,7 +15,6 @@ typedef enum {
   command_stop,
   command_turn_button_on,
   command_turn_button_off,
-  command_query_height,
 } command_code_t;
 
 typedef struct {
@@ -23,11 +23,16 @@ typedef struct {
 
   // Required when command is command_turn_button_on,
   // command_turn_button_off.
-  int8_t floor;  // Optional argument
+  floor_t floor;  // Optional argument
 } command_t;
 
-// Builds a string with the command
-// Returns true if it was built successfully
-bool commandBuild(command_t* command, char* command_string);
+void cmdInitialize(elevator_t* elevator, osMutexId_t mutex);
+void cmdTurnButtonOn(elevator_t* elevator, floor_t floor, osMutexId_t mutex);
+void cmdTurnButtonOff(elevator_t* elevator, floor_t floor, osMutexId_t mutex);
+void cmdStop(elevator_t* elevator, osMutexId_t mutex);
+void cmdOpenDoors(elevator_t* elevator, osMutexId_t mutex);
+void cmdCloseDoors(elevator_t* elevator, osMutexId_t mutex);
+void cmdGoUp(elevator_t* elevator, osMutexId_t mutex);
+void cmdGoDown(elevator_t* elevator, osMutexId_t mutex);
 
 #endif

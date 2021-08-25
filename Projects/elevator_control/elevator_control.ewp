@@ -1051,7 +1051,10 @@
         </settings>
     </configuration>
     <file>
-        <name>$PROJ_DIR$\src\command.c</name>
+        <name>$PROJ_DIR$\src\command_builder.c</name>
+    </file>
+    <file>
+        <name>$PROJ_DIR$\src\command_sender.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\..\..\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a</name>
@@ -1064,9 +1067,6 @@
     </file>
     <file>
         <name>$PROJ_DIR$\src\fan_out_thread.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\height_checker_thread.c</name>
     </file>
     <file>
         <name>$PROJ_DIR$\src\kernel_info.c</name>

@@ -1,6 +1,6 @@
-#include "command.h"
-
 #include <stdio.h>
+
+#include "command.h"
 
 static char buildElevatorCode(elevator_code_t code) {
   switch (code) {
@@ -57,7 +57,7 @@ static bool stop(command_t* command, char* command_string) {
 }
 
 static bool turnButtonOn(command_t* command, char* command_string,
-                         int8_t floor) {
+                         floor_t floor) {
   if (floor < 0 || floor > 15) return false;
   char button_code = 'a' + floor;
   int success = sprintf(command_string, "%cL%c\r",
@@ -67,7 +67,7 @@ static bool turnButtonOn(command_t* command, char* command_string,
 }
 
 static bool turnButtonOff(command_t* command, char* command_string,
-                          int8_t floor) {
+                          floor_t floor) {
   if (floor < 0 || floor > 15) return false;
   char button_code = 'a' + floor;
   int success = sprintf(command_string, "%cD%c\r",
@@ -76,13 +76,8 @@ static bool turnButtonOff(command_t* command, char* command_string,
   return success >= 0;
 }
 
-static bool queryHeight(command_t* command, char* command_string) {
-  int success = sprintf(command_string, "%cx\r",
-                        buildElevatorCode(command->elevator_code));
-
-  return success >= 0;
-}
-
+// Builds a string with the command
+// Returns true if it was built successfully
 bool commandBuild(command_t* command, char* command_string) {
   if (command->elevator_code == elevator_code_unknown) {
 #ifdef DEBUG
@@ -108,8 +103,6 @@ bool commandBuild(command_t* command, char* command_string) {
       return turnButtonOn(command, command_string, command->floor);
     case command_turn_button_off:
       return turnButtonOff(command, command_string, command->floor);
-    case command_query_height:
-      return queryHeight(command, command_string);
   }
 
   return false;
