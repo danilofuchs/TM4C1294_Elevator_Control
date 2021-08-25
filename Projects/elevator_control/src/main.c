@@ -17,7 +17,7 @@
 
 typedef struct {
   osMessageQueueId_t signal_queue;
-  osMutexId_t uart_read_mutex, uart_write_mutex;
+  osMutexId_t uart_write_mutex;
 
   main_thread_t main_thread;
   signal_handler_thread_t signal_handler_thread;
@@ -28,9 +28,7 @@ typedef struct {
 
 static app_t app;
 
-static void createMutexes(app_t* app) {
-  app->uart_read_mutex =
-      osMutexNew(&(osMutexAttr_t){.name = "UART Read Mutex"});
+static void createMutex(app_t* app) {
   app->uart_write_mutex =
       osMutexNew(&(osMutexAttr_t){.name = "UART Write Mutex"});
 }
@@ -55,7 +53,6 @@ static void createSignalHandlerThread(app_t* app) {
       .args =
           {
               .queue = app->signal_queue,
-              .uart_read_mutex = app->uart_read_mutex,
           },
   };
   app->signal_handler_thread.thread_id =
@@ -105,7 +102,7 @@ void main(void) {
 
   if (osKernelGetState() == osKernelInactive) osKernelInitialize();
 
-  createMutexes(&app);
+  createMutex(&app);
   createMainThread(&app);
   createSignalHandlerThread(&app);
   createElevatorThread(&app, &app.left_elevator_thread, elevator_code_left,

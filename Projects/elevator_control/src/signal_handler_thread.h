@@ -6,7 +6,6 @@
 
 typedef struct {
   osMessageQueueId_t queue;
-  osMutexId_t uart_read_mutex;
 } signal_handler_thread_args_t;
 
 typedef struct {
