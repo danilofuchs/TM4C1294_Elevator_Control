@@ -4,8 +4,6 @@
 #include "cmsis_os2.h"
 #include "elevator.h"
 
-#define ELEVATOR_THREAD_HEIGHT_QUERIER_PERIOD 500
-
 typedef struct {
   elevator_code_t code;
 
@@ -17,6 +15,9 @@ typedef struct {
 typedef struct {
   osThreadId_t thread_id;
   osThreadAttr_t attr;
+
+  // Created internally. Notifies when the door can be closed
+  osTimerId_t door_timer;
   elevator_thread_args_t args;
 } elevator_thread_t;
 

@@ -15,7 +15,7 @@ typedef enum {
   signal_internal_button_pressed,
   signal_external_button_pressed,
   signal_height_changed,
-  signal__internal__should_query_height,
+  signal__internal__should_close_doors,
 } signal_code_t;
 
 typedef struct {

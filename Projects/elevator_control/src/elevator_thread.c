@@ -3,6 +3,8 @@
 #include "command.h"
 #include "signal.h"
 
+#define WAIT_FOR_PASSENGERS_TIMEOUT_MS 5000
+
 static void sendCommand(command_t* command, osMutexId_t mutex) {
   char string[16];
   commandBuild(command, string);
@@ -33,8 +35,8 @@ static void cmdTurnButtonOn(elevator_t* elevator, floor_t floor,
   sendCommand(&command, mutex);
 }
 
-static void turnButtonOff(elevator_t* elevator, floor_t floor,
-                          osMutexId_t mutex) {
+static void cmdTurnButtonOff(elevator_t* elevator, floor_t floor,
+                             osMutexId_t mutex) {
   command_t command = {
       .code = command_turn_button_off,
       .elevator_code = elevator->code,
@@ -104,29 +106,11 @@ static void stopMovingIfNecessary(elevator_t* elevator, signal_t signal,
 
   clearRequestsToFloorAndDirection(elevator);
 
+  elevator->state = elevator_state_opening_doors;
+
   cmdStop(elevator, mutex);
   cmdOpenDoors(elevator, mutex);
 }
-
-// static void moveToAtendRequests(elevator_t* elevator, osMutexId_t mutex) {
-//   if (elevator->state == elevator_state_moving) return;
-
-//   if (elevator->door_state != elevator_door_state_closed) {
-//     // Must wait for doors to close before moving.
-//     // Close doors will call this function again.
-//     closeDoors(elevator, mutex);
-//     return;
-//   }
-
-//   elevator_direction_t next_direction = elevatorGetNextDirection(elevator);
-//   if (next_direction == elevator_direction_up) {
-//     goUp(elevator, mutex);
-//   } else if (next_direction == elevator_direction_down) {
-//     goDown(elevator, mutex);
-//   } else {
-//     elevator->state = elevator_state_idle;
-//   }
-// }
 
 static void initializeElevator(elevator_t* elevator, osMutexId_t mutex) {
   elevator->state = elevator_state_idle;
@@ -144,68 +128,12 @@ static void setElevatorFloor(elevator_t* elevator, floor_t floor) {
   elevator->floor = floor;
 }
 
-// static void evInternalButtonWasPressed(elevator_t* elevator, floor_t floor,
-//                                        osMutexId_t mutex) {
-//   if (elevatorIsStoppedAtFloor(elevator, floor)) {
-//     openDoors(elevator, mutex);
-//     return;
-//   };
-
-//   turnButtonOn(elevator, floor, mutex);
-
-//   elevator->internal_requests[floor] = true;
-
-//   // moveToAtendRequests(elevator, mutex);
-// }
-
-// static void evExternalButtonWasPressed(elevator_t* elevator, floor_t floor,
-//                                        elevator_direction_t direction,
-//                                        osMutexId_t mutex) {
-//   bool should_open_doors = elevatorIsStoppedAtFloor(elevator, floor) &&
-//                            (elevator->direction == direction ||
-//                             elevator->state == elevator_state_idle);
-//   if (should_open_doors) {
-//     openDoors(elevator, mutex);
-//     return;
-//   };
-//   if (direction == elevator_direction_up) {
-//     elevator->external_requests_up[floor] = true;
-//   } else if (direction == elevator_direction_down) {
-//     elevator->external_requests_down[floor] = true;
-//   }
-
-//   // moveToAtendRequests(elevator, mutex);
-// }
-
-// static void evDoorsAreClosed(elevator_t* elevator, osMutexId_t mutex) {
-//   elevator->door_state = elevator_door_state_closed;
-//   // moveToAtendRequests(elevator, mutex);
-// }
-
 static void setDoorsOpen(elevator_t* elevator) {
   elevator->door_state = elevator_door_state_open;
 }
 static void setDoorsClosed(elevator_t* elevator) {
   elevator->door_state = elevator_door_state_closed;
 }
-
-// static void evDoorsAreOpen(elevator_t* elevator, osMutexId_t mutex) {
-//   elevator->door_state = elevator_door_state_open;
-//   // turnButtonOff(elevator, elevator->floor, mutex);
-//   elevator->state = elevator_state_awaiting_passengers;
-//   // TODO: Fire a timer to close the doors after a certain amount of time.
-//   // osDelay(5000);
-//   // closeDoors(elevator, mutex);
-// }
-
-// static void evHeightChanged(elevator_t* elevator, uint32_t height,
-//                             osMutexId_t mutex) {
-//   elevator->height = height;
-//   floor_t estimated_floor = elevatorGetEstimatedFloorGivenHeight(elevator);
-//   if (estimated_floor != -1) {
-//     stopIfNecessary(elevator, estimated_floor, mutex);
-//   }
-// }
 
 static void addRequestToQueue(elevator_t* elevator, signal_t signal) {
   bool is_internal_request = signal.code == signal_internal_button_pressed;
@@ -262,7 +190,34 @@ static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
     elevator->direction = elevator_direction_down;
 
     cmdGoDown(elevator, mutex);
+  } else {
+    elevator->state = elevator_state_idle;
   }
+}
+
+static void awaitForPassengers(elevator_t* elevator, osTimerId_t timer,
+                               osMutexId_t mutex) {
+  elevator->state = elevator_state_awaiting_passengers;
+  cmdTurnButtonOff(elevator, elevator->floor, mutex);
+  osStatus_t status = osTimerStart(timer, WAIT_FOR_PASSENGERS_TIMEOUT_MS);
+}
+
+static void closeDoors(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->state = elevator_state_closing_doors;
+  cmdCloseDoors(elevator, mutex);
+}
+
+typedef struct {
+  osMessageQueueId_t* queue;
+} door_timer_callback_args_t;
+static void doorTimerCallback(void* arg) {
+  door_timer_callback_args_t* args = (door_timer_callback_args_t*)arg;
+
+  signal_t signal = {
+      .code = signal__internal__should_close_doors,
+  };
+
+  osMessageQueuePut(*args->queue, &signal, NULL, osWaitForever);
 }
 
 void elevatorThread(void* arg) {
@@ -277,6 +232,11 @@ void elevatorThread(void* arg) {
       .direction = elevator_direction_none,
       .door_state = elevator_door_state_closed,
   };
+
+  this->door_timer =
+      osTimerNew(doorTimerCallback, osTimerOnce,
+                 &(door_timer_callback_args_t){.queue = &this->args.queue},
+                 &(osTimerAttr_t){.name = "Door Timer"});
 
   signal_t signal;
   while (1) {
@@ -322,46 +282,14 @@ void elevatorThread(void* arg) {
           stopMovingIfNecessary(&elevator, signal, mutex);
         }
         break;
-        // case elevator_state_awaiting_passengers:
-        //   if (signal.code == signal_doors_closed) {
-        //     evDoorsAreClosed(&elevator, mutex);
-        //   }
-        //   break;
-        // case elevator_state_closing_doors:
-        //   if (signal.code == signal_doors_closed) {
-        //     evDoorsAreClosed(&elevator, mutex);
-        //   }
-        //   break;
-        // case elevator_state_opening_doors:
-        //   if (signal.code == signal_doors_open) {
-        //     evDoorsAreOpen(&elevator, mutex);
-        //   }
-        //   break;
+      case elevator_state_opening_doors:
+        if (signal.code == signal_doors_open) {
+          awaitForPassengers(&elevator, this->door_timer, mutex);
+        }
+      case elevator_state_awaiting_passengers:
+        if (signal.code == signal__internal__should_close_doors) {
+          closeDoors(&elevator, mutex);
+        }
     }
-
-    // switch (signal.code) {
-    //   case signal_system_initialized:
-    //     evInitialized(&elevator, mutex);
-    //     break;
-    //   case signal_internal_button_pressed:
-    //     evInternalButtonWasPressed(&elevator, signal.floor, mutex);
-    //     break;
-    //   case signal_external_button_pressed:
-    //     evExternalButtonWasPressed(&elevator, signal.floor, signal.direction,
-    //                                mutex);
-    //     break;
-    //   case signal_doors_closed:
-    //     evDoorsAreClosed(&elevator, mutex);
-    //     break;
-    //   case signal_doors_open:
-    //     evDoorsAreOpen(&elevator, mutex);
-    //     break;
-    //   case signal_reached_floor:
-    //     evReachedFloor(&elevator, signal.floor, mutex);
-    //     break;
-    //   case signal_height_changed:
-    //     evHeightChanged(&elevator, signal.height, mutex);
-    //     break;
-    // }
   }
 }
