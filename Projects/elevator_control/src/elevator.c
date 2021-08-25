@@ -14,17 +14,16 @@ bool elevatorIsStoppedAtFloor(elevator_t *elevator, floor_t floor) {
 }
 
 bool elevatorShouldStopAtFloor(elevator_t *elevator, floor_t floor) {
-  if (elevator->internal_requests[floor]) return true;
+  bool has_internal_request = elevator->internal_requests[floor];
+  bool has_external_request_up = elevator->external_requests_up[floor];
+  bool has_external_request_down = elevator->external_requests_down[floor];
 
-  if (elevator->external_requests_up[floor] &&
-      elevator->direction == elevator_direction_up)
-    return true;
+  bool is_already_going_up = elevator->direction == elevator_direction_up;
+  bool is_already_going_down = elevator->direction == elevator_direction_down;
 
-  if (elevator->external_requests_down[floor] &&
-      elevator->direction == elevator_direction_down)
-    return true;
-
-  return false;
+  return has_internal_request ||
+         (has_external_request_up && is_already_going_up) ||
+         (has_external_request_down && is_already_going_down);
 }
 
 static bool hasRequestForFloor(elevator_t *elevator, floor_t floor) {
