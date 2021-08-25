@@ -83,28 +83,3 @@ floor_t elevatorGetNextRequest(elevator_t *elevator) {
 
   return floor_none;
 }
-
-// Finds out if elevator is aligned with floor based on the current height.
-// Returns the floor if aligned, otherwise returns -1.
-floor_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator) {
-  double floor_fractions =
-      (double)elevator->height / (double)ELEVATOR_FLOOR_HEIGHT;
-
-  double _integer_part;
-  double fraction = modf(floor_fractions, &_integer_part);
-
-  double tolerancy =
-      (double)ELEVATOR_FLOOR_HEIGHT / (double)ELEVATOR_FLOOR_TOLERANCY;
-
-  if (floor_fractions > tolerancy && floor_fractions < 1.0 - tolerancy) {
-    // We are between floors, so we are need to detect the floor that is closest
-    // to the current position
-    if (fraction < 0.5) {
-      return (floor_t)floor(floor_fractions);
-    } else {
-      return (floor_t)ceil(floor_fractions);
-    }
-  }
-
-  return floor_none;
-}

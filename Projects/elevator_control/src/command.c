@@ -76,13 +76,6 @@ static bool turnButtonOff(command_t* command, char* command_string,
   return success >= 0;
 }
 
-static bool queryHeight(command_t* command, char* command_string) {
-  int success = sprintf(command_string, "%cx\r",
-                        buildElevatorCode(command->elevator_code));
-
-  return success >= 0;
-}
-
 bool commandBuild(command_t* command, char* command_string) {
   if (command->elevator_code == elevator_code_unknown) {
 #ifdef DEBUG
@@ -108,8 +101,6 @@ bool commandBuild(command_t* command, char* command_string) {
       return turnButtonOn(command, command_string, command->floor);
     case command_turn_button_off:
       return turnButtonOff(command, command_string, command->floor);
-    case command_query_height:
-      return queryHeight(command, command_string);
   }
 
   return false;

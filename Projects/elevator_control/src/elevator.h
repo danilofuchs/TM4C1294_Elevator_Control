@@ -5,8 +5,6 @@
 
 #define ELEVATOR_NUM_FLOORS 16
 #define ELEVATOR_MAX_NUM_REQUESTS ELEVATOR_NUM_FLOORS * 3
-#define ELEVATOR_FLOOR_HEIGHT 5000
-#define ELEVATOR_FLOOR_TOLERANCY 100
 
 typedef int8_t floor_t;
 extern const floor_t floor_none;
@@ -49,7 +47,6 @@ typedef struct {
   elevator_state_t state;
 
   floor_t floor;
-  uint32_t height;
   elevator_direction_t direction;
   elevator_door_state_t door_state;
 
@@ -61,6 +58,5 @@ typedef struct {
 bool elevatorIsStoppedAtFloor(elevator_t *elevator, floor_t floor);
 bool elevatorShouldStopAtFloor(elevator_t *elevator, floor_t floor);
 floor_t elevatorGetNextRequest(elevator_t *elevator);
-floor_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator);
 
 #endif

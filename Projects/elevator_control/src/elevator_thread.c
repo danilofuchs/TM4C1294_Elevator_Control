@@ -228,7 +228,6 @@ void elevatorThread(void* arg) {
       .code = this->args.code,
       .state = elevator_state_uninitialized,
       .floor = 0,
-      .height = 0,
       .direction = elevator_direction_none,
       .door_state = elevator_door_state_closed,
   };

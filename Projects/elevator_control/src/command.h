@@ -14,7 +14,6 @@ typedef enum {
   command_stop,
   command_turn_button_on,
   command_turn_button_off,
-  command_query_height,
 } command_code_t;
 
 typedef struct {

@@ -1066,9 +1066,6 @@
         <name>$PROJ_DIR$\src\fan_out_thread.c</name>
     </file>
     <file>
-        <name>$PROJ_DIR$\src\height_checker_thread.c</name>
-    </file>
-    <file>
         <name>$PROJ_DIR$\src\kernel_info.c</name>
     </file>
     <file>

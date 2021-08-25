@@ -9,21 +9,6 @@
 static bool isNumeric(char ch) { return ch >= '0' && ch <= '9'; }
 static uint8_t parseIntFromChar(char ch) { return ch - '0'; }
 
-// Given a string representing a large integer,
-// return the integer value.
-//
-// The string should only contain digits.
-// Otherwise, returns 0.
-static uint32_t parseIntFromString(char *string) {
-  int length = strlen(string);
-  uint32_t height = 0;
-  for (int i = 0; i < length; i++) {
-    if (!isNumeric(string[i])) return 0;
-    height = height * 10 + parseIntFromChar(string[i]);
-  }
-  return height;
-}
-
 static floor_t parseFloor(char *input, signal_code_t signal_code) {
   if (signal_code == signal_reached_floor) {
     // <0:elevator><1:dozens or units><2:units>
@@ -71,9 +56,6 @@ elevator_code_t parseElevatorCode(char *input) {
 }
 
 signal_code_t parseSignalCode(char *input) {
-  if (isNumeric(input[0])) {
-    return signal_height_changed;
-  }
   if (isNumeric(input[1])) {
     return signal_reached_floor;
   }
@@ -107,14 +89,6 @@ static elevator_direction_t parseDirection(char *input,
   return elevator_direction_none;
 }
 
-static uint32_t parseHeight(char *input, signal_code_t signal_code) {
-  if (signal_code != signal_height_changed) return 0;
-  // Signal is a numeric string and can be up to 75000
-  uint32_t height = parseIntFromString(input);
-
-  return height;
-}
-
 bool signalParse(signal_t *signal, char *input) {
   if (strcmp(input, "initialized") == 0) {
     signal->elevator_code = elevator_code_unknown;
@@ -138,13 +112,10 @@ bool signalParse(signal_t *signal, char *input) {
 
   elevator_direction_t direction = parseDirection(input, signal_code);
 
-  uint32_t height = parseHeight(input, signal_code);
-
   signal->elevator_code = elevator_code;
   signal->code = signal_code;
   signal->floor = floor;
   signal->direction = direction;
-  signal->height = height;
 
   return true;
 }
@@ -152,8 +123,7 @@ bool signalParse(signal_t *signal, char *input) {
 void signalDebug(signal_t *signal) {
 #ifdef DEBUG
   // Compact form because printing a lot of data is slow
-  printf("S: c:%d;el:%d,fl:%d,dir:%d,h:%d\n", signal->code,
-         signal->elevator_code, signal->floor, signal->direction,
-         signal->height);
+  printf("S: c:%d;el:%d,fl:%d,dir:%d\n", signal->code, signal->elevator_code,
+         signal->floor, signal->direction);
 #endif
 }
