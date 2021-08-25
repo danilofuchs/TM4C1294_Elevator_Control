@@ -24,7 +24,7 @@ static uint32_t parseIntFromString(char *string) {
   return height;
 }
 
-static int8_t parseFloor(char *input, signal_code_t signal_code) {
+static floor_t parseFloor(char *input, signal_code_t signal_code) {
   if (signal_code == signal_reached_floor) {
     // <0:elevator><1:dozens or units><2:units>
     char dozensOrUnits = input[1];
@@ -134,7 +134,7 @@ bool signalParse(signal_t *signal, char *input) {
 
   elevator_code_t elevator_code = parseElevatorCode(input);
 
-  int8_t floor = parseFloor(input, signal_code);
+  floor_t floor = parseFloor(input, signal_code);
 
   elevator_direction_t direction = parseDirection(input, signal_code);
 

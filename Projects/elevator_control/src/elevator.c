@@ -3,7 +3,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor) {
+const floor_t floor_none = -1;
+
+bool elevatorIsStoppedAtFloor(elevator_t *elevator, floor_t floor) {
   if (floor != elevator->floor) return false;
 
   return elevator->state == elevator_state_idle ||
@@ -11,7 +13,7 @@ bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor) {
          elevator->state == elevator_state_opening_doors;
 }
 
-bool elevatorShouldStopAtFloor(elevator_t *elevator, uint8_t floor) {
+bool elevatorShouldStopAtFloor(elevator_t *elevator, floor_t floor) {
   if (elevator->internal_requests[floor]) return true;
 
   if (elevator->external_requests_up[floor] &&
@@ -25,31 +27,31 @@ bool elevatorShouldStopAtFloor(elevator_t *elevator, uint8_t floor) {
   return false;
 }
 
-static bool hasRequestForFloor(elevator_t *elevator, uint8_t floor) {
+static bool hasRequestForFloor(elevator_t *elevator, floor_t floor) {
   return elevator->internal_requests[floor] ||
          elevator->external_requests_down[floor] ||
          elevator->external_requests_up[floor];
 }
 
-static bool hasRequestAbove(elevator_t *elevator) {
-  for (int8_t floor = elevator->floor + 1; floor <= ELEVATOR_NUM_FLOORS;
+static floor_t getClosestRequestAbove(elevator_t *elevator) {
+  for (floor_t floor = elevator->floor + 1; floor <= ELEVATOR_NUM_FLOORS;
        floor++) {
-    if (hasRequestForFloor(elevator, floor)) return true;
+    if (hasRequestForFloor(elevator, floor)) return floor;
   }
-  return false;
+  return floor_none;
 }
 
-static bool hasRequestBelow(elevator_t *elevator) {
-  for (int8_t floor = elevator->floor - 1; floor >= 0; floor--) {
-    if (hasRequestForFloor(elevator, floor)) return true;
+static floor_t getClosestRequestBelow(elevator_t *elevator) {
+  for (floor_t floor = elevator->floor - 1; floor >= 0; floor--) {
+    if (hasRequestForFloor(elevator, floor)) return floor;
   }
-  return false;
+  return floor_none;
 }
 
-static int8_t getClosestRequestedFloor(elevator_t *elevator) {
-  int8_t closest_floor = -1;
+static floor_t getClosestRequest(elevator_t *elevator) {
+  floor_t closest_floor = -1;
   uint8_t closest_distance = UINT8_MAX;
-  for (int8_t floor = 0; floor < ELEVATOR_NUM_FLOORS; floor++) {
+  for (floor_t floor = 0; floor < ELEVATOR_NUM_FLOORS; floor++) {
     if (!hasRequestForFloor(elevator, floor)) continue;
 
     uint8_t distance = abs(elevator->floor - floor);
@@ -67,30 +69,25 @@ static int8_t getClosestRequestedFloor(elevator_t *elevator) {
   return closest_floor;
 }
 
-elevator_direction_t elevatorGetNextDirection(elevator_t *elevator) {
-  if (elevator->direction == elevator_direction_up &&
-      hasRequestAbove(elevator)) {
-    return elevator_direction_up;
+floor_t elevatorGetNextRequest(elevator_t *elevator) {
+  if (elevator->direction == elevator_direction_up) {
+    floor_t closest = getClosestRequestAbove(elevator);
+    if (closest != floor_none) return closest;
   }
-  if (elevator->direction == elevator_direction_down &&
-      hasRequestBelow(elevator)) {
-    return elevator_direction_down;
+  if (elevator->direction == elevator_direction_down) {
+    floor_t closest = getClosestRequestBelow(elevator);
+    if (closest != floor_none) return closest;
   }
 
-  int8_t closest_request = getClosestRequestedFloor(elevator);
-  if (closest_request == -1) return elevator_direction_none;
+  floor_t closest = getClosestRequest(elevator);
+  if (closest != floor_none) return closest;
 
-  if (elevator->floor < closest_request) {
-    return elevator_direction_up;
-  } else if (elevator->floor > closest_request) {
-    return elevator_direction_down;
-  }
-  return elevator_direction_none;
+  return floor_none;
 }
 
 // Finds out if elevator is aligned with floor based on the current height.
 // Returns the floor if aligned, otherwise returns -1.
-int8_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator) {
+floor_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator) {
   double floor_fractions =
       (double)elevator->height / (double)ELEVATOR_FLOOR_HEIGHT;
 
@@ -104,11 +101,11 @@ int8_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator) {
     // We are between floors, so we are need to detect the floor that is closest
     // to the current position
     if (fraction < 0.5) {
-      return (int8_t)floor(floor_fractions);
+      return (floor_t)floor(floor_fractions);
     } else {
-      return (int8_t)ceil(floor_fractions);
+      return (floor_t)ceil(floor_fractions);
     }
   }
 
-  return -1;
+  return floor_none;
 }

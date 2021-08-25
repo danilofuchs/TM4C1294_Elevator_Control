@@ -8,6 +8,9 @@
 #define ELEVATOR_FLOOR_HEIGHT 5000
 #define ELEVATOR_FLOOR_TOLERANCY 100
 
+typedef int8_t floor_t;
+extern const floor_t floor_none;
+
 typedef enum {
   elevator_code_unknown,
   elevator_code_left,
@@ -45,7 +48,7 @@ typedef struct {
   elevator_code_t code;
   elevator_state_t state;
 
-  int8_t floor;
+  floor_t floor;
   uint32_t height;
   elevator_direction_t direction;
   elevator_door_state_t door_state;
@@ -55,9 +58,9 @@ typedef struct {
   bool external_requests_down[ELEVATOR_NUM_FLOORS];
 } elevator_t;
 
-bool elevatorIsStoppedAtFloor(elevator_t *elevator, uint8_t floor);
-bool elevatorShouldStopAtFloor(elevator_t *elevator, uint8_t floor);
-elevator_direction_t elevatorGetNextDirection(elevator_t *elevator);
-int8_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator);
+bool elevatorIsStoppedAtFloor(elevator_t *elevator, floor_t floor);
+bool elevatorShouldStopAtFloor(elevator_t *elevator, floor_t floor);
+floor_t elevatorGetNextRequest(elevator_t *elevator);
+floor_t elevatorGetEstimatedFloorGivenHeight(elevator_t *elevator);
 
 #endif

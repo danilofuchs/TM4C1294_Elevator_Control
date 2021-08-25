@@ -23,7 +23,7 @@ typedef struct {
 
   // Required when command is command_turn_button_on,
   // command_turn_button_off.
-  int8_t floor;  // Optional argument
+  floor_t floor;  // Optional argument
 } command_t;
 
 // Builds a string with the command

@@ -57,7 +57,7 @@ static bool stop(command_t* command, char* command_string) {
 }
 
 static bool turnButtonOn(command_t* command, char* command_string,
-                         int8_t floor) {
+                         floor_t floor) {
   if (floor < 0 || floor > 15) return false;
   char button_code = 'a' + floor;
   int success = sprintf(command_string, "%cL%c\r",
@@ -67,7 +67,7 @@ static bool turnButtonOn(command_t* command, char* command_string,
 }
 
 static bool turnButtonOff(command_t* command, char* command_string,
-                          int8_t floor) {
+                          floor_t floor) {
   if (floor < 0 || floor > 15) return false;
   char button_code = 'a' + floor;
   int success = sprintf(command_string, "%cD%c\r",

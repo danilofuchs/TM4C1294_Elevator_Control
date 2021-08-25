@@ -25,7 +25,7 @@ typedef struct {
   // Available when signal is signal_reached_floor,
   // signal_internal_button_pressed or signal_external_button_pressed
   // -1 otherwise.
-  int8_t floor;
+  floor_t floor;
 
   // Available for signal_external_button_pressed,
   // elevator_direction_unknown otherwise.
