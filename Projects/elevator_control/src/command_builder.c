@@ -1,6 +1,6 @@
-#include "command.h"
-
 #include <stdio.h>
+
+#include "command.h"
 
 static char buildElevatorCode(elevator_code_t code) {
   switch (code) {
@@ -76,6 +76,8 @@ static bool turnButtonOff(command_t* command, char* command_string,
   return success >= 0;
 }
 
+// Builds a string with the command
+// Returns true if it was built successfully
 bool commandBuild(command_t* command, char* command_string) {
   if (command->elevator_code == elevator_code_unknown) {
 #ifdef DEBUG

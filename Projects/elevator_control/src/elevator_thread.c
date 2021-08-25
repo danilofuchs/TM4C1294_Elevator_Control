@@ -5,89 +5,20 @@
 
 #define WAIT_FOR_PASSENGERS_TIMEOUT_MS 5000
 
-static void sendCommand(command_t* command, osMutexId_t mutex) {
-  char string[16];
-  commandBuild(command, string);
+static void initializeElevator(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->state = elevator_state_idle;
 
-  osMutexAcquire(mutex, osWaitForever);
-  UARTprintf(string);
-  UARTFlushTx(false);
-  osMutexRelease(mutex);
+  cmdInitialize(elevator, mutex);
 }
 
-static void cmdInitialize(elevator_t* elevator, osMutexId_t mutex) {
-  command_t command = {
-      .code = command_initialize,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command, mutex);
+static void turnButtonOn(elevator_t* elevator, floor_t floor,
+                         osMutexId_t mutex) {
+  cmdTurnButtonOn(elevator, floor, mutex);
 }
 
-static void cmdTurnButtonOn(elevator_t* elevator, floor_t floor,
-                            osMutexId_t mutex) {
-  command_t command = {
-      .code = command_turn_button_on,
-      .elevator_code = elevator->code,
-      .floor = floor,
-  };
-
-  sendCommand(&command, mutex);
-}
-
-static void cmdTurnButtonOff(elevator_t* elevator, floor_t floor,
-                             osMutexId_t mutex) {
-  command_t command = {
-      .code = command_turn_button_off,
-      .elevator_code = elevator->code,
-      .floor = floor,
-  };
-
-  sendCommand(&command, mutex);
-}
-
-static void cmdStop(elevator_t* elevator, osMutexId_t mutex) {
-  command_t command = {
-      .code = command_stop,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command, mutex);
-}
-
-static void cmdOpenDoors(elevator_t* elevator, osMutexId_t mutex) {
-  command_t command = {
-      .code = command_open_doors,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command, mutex);
-}
-static void cmdCloseDoors(elevator_t* elevator, osMutexId_t mutex) {
-  command_t command = {
-      .code = command_close_doors,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command, mutex);
-}
-
-static void cmdGoUp(elevator_t* elevator, osMutexId_t mutex) {
-  command_t command = {
-      .code = command_go_up,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command, mutex);
-}
-
-static void cmdGoDown(elevator_t* elevator, osMutexId_t mutex) {
-  command_t command = {
-      .code = command_go_down,
-      .elevator_code = elevator->code,
-  };
-
-  sendCommand(&command, mutex);
+static void turnButtonOff(elevator_t* elevator, floor_t floor,
+                          osMutexId_t mutex) {
+  cmdTurnButtonOff(elevator, floor, mutex);
 }
 
 static void clearRequestsToFloorAndDirection(elevator_t* elevator) {
@@ -110,17 +41,6 @@ static void stopMovingIfNecessary(elevator_t* elevator, signal_t signal,
 
   cmdStop(elevator, mutex);
   cmdOpenDoors(elevator, mutex);
-}
-
-static void initializeElevator(elevator_t* elevator, osMutexId_t mutex) {
-  elevator->state = elevator_state_idle;
-
-  cmdInitialize(elevator, mutex);
-}
-
-static void turnButtonOn(elevator_t* elevator, floor_t floor,
-                         osMutexId_t mutex) {
-  cmdTurnButtonOn(elevator, floor, mutex);
 }
 
 static void setElevatorFloor(elevator_t* elevator, floor_t floor) {
@@ -198,7 +118,7 @@ static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
 static void awaitForPassengers(elevator_t* elevator, osTimerId_t timer,
                                osMutexId_t mutex) {
   elevator->state = elevator_state_awaiting_passengers;
-  cmdTurnButtonOff(elevator, elevator->floor, mutex);
+  turnButtonOff(elevator, elevator->floor, mutex);
   osStatus_t status = osTimerStart(timer, WAIT_FOR_PASSENGERS_TIMEOUT_MS);
 }
 
