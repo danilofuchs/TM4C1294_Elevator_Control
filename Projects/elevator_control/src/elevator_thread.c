@@ -30,7 +30,7 @@ static void clearRequestsToFloorAndDirection(elevator_t* elevator) {
   }
 }
 
-static void stopMovingIfNecessary(elevator_t* elevator, signal_t signal,
+static void stopMovingOrKeepGoing(elevator_t* elevator, signal_t signal,
                                   osMutexId_t mutex) {
   bool should_stop = elevatorShouldStopAtFloor(elevator, signal.floor);
   if (!should_stop) return;
@@ -83,8 +83,8 @@ static void closeDoors(elevator_t* elevator, osMutexId_t mutex) {
   cmdCloseDoors(elevator, mutex);
 }
 
-static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
-                                   osMutexId_t mutex) {
+static void startMovingOrReturnToIdle(elevator_t* elevator, signal_t signal,
+                                      osMutexId_t mutex) {
   if (elevator->state != elevator_state_idle &&
       elevator->state != elevator_state_closing_doors)
     return;
@@ -121,14 +121,25 @@ static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
   }
 }
 
-static void handleNewRequestsToCurrentFloor(elevator_t* elevator,
-                                            signal_t signal, osTimerId_t timer,
-                                            osMutexId_t mutex) {
+// A request may come in to the same floor we are at.
+// If we are at idle, we should make sure the door is open
+// and we are waiting for passengers.
+//
+// If we are already waiting for passengers, we should
+// wait a little more, restarting the timer.
+//
+// If we are moving
+static void attendNewRequestToCurrentFloorIfStopped(elevator_t* elevator,
+                                                    signal_t signal,
+                                                    osTimerId_t timer,
+                                                    osMutexId_t mutex) {
   if (signal.code != signal_internal_button_pressed &&
       signal.code != signal_external_button_pressed)
     return;
 
-  if (signal.floor != elevator->floor) return;
+  bool is_stopped_at_this_floor =
+      elevatorIsStoppedAtFloor(elevator, signal.floor);
+  if (!is_stopped_at_this_floor) return;
 
   bool doors_are_closed = elevator->door_state == elevator_door_state_closed;
   bool doors_are_open = !doors_are_closed;
@@ -200,7 +211,8 @@ void elevatorThread(void* arg) {
     if (signal.code == signal_reached_floor) {
       setElevatorFloor(&elevator, signal.floor);
     }
-    handleNewRequestsToCurrentFloor(&elevator, signal, this->door_timer, mutex);
+    attendNewRequestToCurrentFloorIfStopped(&elevator, signal, this->door_timer,
+                                            mutex);
 
     switch (elevator.state) {
       case elevator_state_uninitialized:
@@ -210,16 +222,16 @@ void elevatorThread(void* arg) {
         break;
       case elevator_state_idle:
         // Listen to all signals
-        startMovingIfNecessary(&elevator, signal, mutex);
+        startMovingOrReturnToIdle(&elevator, signal, mutex);
         break;
       case elevator_state_closing_doors:
         if (signal.code == signal_doors_closed) {
-          startMovingIfNecessary(&elevator, signal, mutex);
+          startMovingOrReturnToIdle(&elevator, signal, mutex);
         }
         break;
       case elevator_state_moving:
         if (signal.code == signal_reached_floor) {
-          stopMovingIfNecessary(&elevator, signal, mutex);
+          stopMovingOrKeepGoing(&elevator, signal, mutex);
         }
         break;
       case elevator_state_opening_doors:
