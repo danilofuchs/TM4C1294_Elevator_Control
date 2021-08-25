@@ -70,6 +70,19 @@ static void addRequestToQueue(elevator_t* elevator, signal_t signal) {
   }
 }
 
+static void awaitForPassengers(elevator_t* elevator, osTimerId_t timer,
+                               osMutexId_t mutex) {
+  elevator->state = elevator_state_awaiting_passengers;
+  clearRequestsToFloorAndDirection(elevator);
+  turnButtonOff(elevator, elevator->floor, mutex);
+  osStatus_t status = osTimerStart(timer, WAIT_FOR_PASSENGERS_TIMEOUT_MS);
+}
+
+static void closeDoors(elevator_t* elevator, osMutexId_t mutex) {
+  elevator->state = elevator_state_closing_doors;
+  cmdCloseDoors(elevator, mutex);
+}
+
 static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
                                    osMutexId_t mutex) {
   if (elevator->state != elevator_state_idle &&
@@ -79,23 +92,16 @@ static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
   floor_t next_request = elevatorGetNextRequest(elevator);
 
   bool has_request = next_request != floor_none;
-  bool are_doors_closed = elevator->door_state == elevator_door_state_closed;
-  bool are_doors_open = !are_doors_closed;
+  bool doors_are_open = elevator->door_state == elevator_door_state_open;
 
   bool should_stay_same_floor = has_request && next_request == elevator->floor;
   bool should_move = !should_stay_same_floor;
   bool should_go_up = has_request && next_request > elevator->floor;
   bool should_go_down = has_request && next_request < elevator->floor;
 
-  bool should_close_doors = has_request && should_move && are_doors_open;
-  bool should_open_doors =
-      has_request && should_stay_same_floor && are_doors_closed;
+  bool should_close_doors = has_request && should_move && doors_are_open;
 
-  if (should_open_doors) {
-    elevator->state = elevator_state_opening_doors;
-
-    cmdOpenDoors(elevator, mutex);
-  } else if (should_close_doors) {
+  if (should_close_doors) {
     // Close doors. We will be called again once they are closed.
     elevator->state = elevator_state_closing_doors;
 
@@ -115,16 +121,30 @@ static void startMovingIfNecessary(elevator_t* elevator, signal_t signal,
   }
 }
 
-static void awaitForPassengers(elevator_t* elevator, osTimerId_t timer,
-                               osMutexId_t mutex) {
-  elevator->state = elevator_state_awaiting_passengers;
-  turnButtonOff(elevator, elevator->floor, mutex);
-  osStatus_t status = osTimerStart(timer, WAIT_FOR_PASSENGERS_TIMEOUT_MS);
-}
+static void handleNewRequestsToCurrentFloor(elevator_t* elevator,
+                                            signal_t signal, osTimerId_t timer,
+                                            osMutexId_t mutex) {
+  if (signal.code != signal_internal_button_pressed &&
+      signal.code != signal_external_button_pressed)
+    return;
 
-static void closeDoors(elevator_t* elevator, osMutexId_t mutex) {
-  elevator->state = elevator_state_closing_doors;
-  cmdCloseDoors(elevator, mutex);
+  if (signal.floor != elevator->floor) return;
+
+  bool doors_are_closed = elevator->door_state == elevator_door_state_closed;
+  bool doors_are_open = !doors_are_closed;
+
+  bool is_idle = elevator->state == elevator_state_idle;
+  bool is_awaiting_passengers =
+      elevator->state == elevator_state_awaiting_passengers;
+
+  if (is_idle && doors_are_open) {
+    awaitForPassengers(elevator, timer, mutex);
+  } else if (is_idle && doors_are_closed) {
+    elevator->state = elevator_state_opening_doors;
+    cmdOpenDoors(elevator, mutex);
+  } else if (is_awaiting_passengers) {
+    awaitForPassengers(elevator, timer, mutex);
+  }
 }
 
 typedef struct {
@@ -180,6 +200,7 @@ void elevatorThread(void* arg) {
     if (signal.code == signal_reached_floor) {
       setElevatorFloor(&elevator, signal.floor);
     }
+    handleNewRequestsToCurrentFloor(&elevator, signal, this->door_timer, mutex);
 
     switch (elevator.state) {
       case elevator_state_uninitialized:
