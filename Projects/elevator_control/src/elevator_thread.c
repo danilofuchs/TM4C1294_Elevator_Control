@@ -55,7 +55,7 @@ static void setDoorsClosed(elevator_t* elevator) {
   elevator->door_state = elevator_door_state_closed;
 }
 
-static void addRequestToQueue(elevator_t* elevator, signal_t signal) {
+static void addRequestToMap(elevator_t* elevator, signal_t signal) {
   bool is_internal_request = signal.code == signal_internal_button_pressed;
   bool is_external_request = signal.code == signal_external_button_pressed;
   bool is_up = signal.direction == elevator_direction_up;
@@ -197,10 +197,10 @@ void elevatorThread(void* arg) {
 
     if (signal.code == signal_internal_button_pressed) {
       turnButtonOn(&elevator, signal.floor, mutex);
-      addRequestToQueue(&elevator, signal);
+      addRequestToMap(&elevator, signal);
     }
     if (signal.code == signal_external_button_pressed) {
-      addRequestToQueue(&elevator, signal);
+      addRequestToMap(&elevator, signal);
     }
     if (signal.code == signal_doors_open) {
       setDoorsOpen(&elevator);

@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="oifts4adpvqHhOhjiGYB" name="Page-1">
-        <mxGraphModel dx="719" dy="559" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#FFFFFF" math="0" shadow="0">
+        <mxGraphModel dx="1109" dy="559" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#FFFFFF" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -29,7 +29,7 @@
                         <Array as="points"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="13" target="25">
+                <mxCell id="49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="13" target="25" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="90" y="240"/>
@@ -37,12 +37,12 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="50" value="Request [doors are open]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="49">
+                <mxCell id="50" value="Request [doors are open]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="49" vertex="1" connectable="0">
                     <mxGeometry x="-0.1516" y="1" relative="1" as="geometry">
                         <mxPoint x="-1" y="-15" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="13" target="27">
+                <mxCell id="51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="13" target="27" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="20" y="210"/>
@@ -51,7 +51,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="52" value="Request [same floor and direction, doors are closed]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="51">
+                <mxCell id="52" value="Request [same floor and direction, doors are closed]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="51" vertex="1" connectable="0">
                     <mxGeometry x="-0.3929" y="2" relative="1" as="geometry">
                         <mxPoint x="128" y="134" as="offset"/>
                     </mxGeometry>
@@ -122,7 +122,7 @@
                 <mxCell id="29" value="entry / clearRequestsToFloorAndDirection&#10;do / turnButtonOff" style="fillColor=none;strokeColor=none;align=left;verticalAlign=middle;spacingLeft=5;" parent="28" vertex="1">
                     <mxGeometry y="30" width="240" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="28" source="29" target="28">
+                <mxCell id="47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=1;entryDx=0;entryDy=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" parent="28" source="29" target="28" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="60" y="105"/>
@@ -130,21 +130,21 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="48" value="Request [same floor and direction]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="47">
+                <mxCell id="48" value="Request [same floor and direction]" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="47" vertex="1" connectable="0">
                     <mxGeometry x="0.1161" y="-2" relative="1" as="geometry">
                         <mxPoint x="-8" y="8" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="44" value="Uninitialized" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" vertex="1" parent="1">
+                <mxCell id="44" value="Uninitialized" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;rounded=1;absoluteArcSize=1;arcSize=15;glass=0;backgroundOutline=0;" parent="1" vertex="1">
                     <mxGeometry x="160" y="40" width="130" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="46" value="System initialized / openDoors" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" target="13">
+                <mxCell id="46" value="System initialized / openDoors" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="13" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint x="225" y="109.99999999999994" as="sourcePoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="53" value="- On any internal&amp;nbsp;request, turnButtonOn&lt;br&gt;- Keep a separate request queue for each type of request (internal, external up, external down)&lt;br&gt;- On any request (internal or external), addRequestToQueue&lt;br&gt;&lt;div&gt;&lt;span&gt;- Determine direction of movement by analysing request queues&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;" vertex="1" parent="1">
-                    <mxGeometry x="340" y="40" width="520" height="60" as="geometry"/>
+                <mxCell id="53" value="- On any internal&amp;nbsp;request, turnButtonOn&lt;br&gt;- Store a separate map of requests for each type of request (internal, external up, external down)&lt;br&gt;- On any request (internal or external), addRequestToMap&lt;br&gt;&lt;div&gt;&lt;span&gt;- Determine direction of movement by analysing pending request maps&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="40" width="530" height="60" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

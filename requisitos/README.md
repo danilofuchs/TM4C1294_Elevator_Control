@@ -56,7 +56,7 @@
 
 ### RF10: _Elevador_ deverá acender luz do botão interno quando receber _sinal_ de _requisição_ interna
 
-### RF11: _Elevador_ deverá apagar todas as luzes acesas nos botões correspondentes ao andar, direção e _elevador_ atual, quando atingir um andar requisitado
+### RF11: _Elevador_ deverá apagar todas as luzes acesas nos botões correspondentes ao andar quando atingir um andar requisitado
 
 # Requisitos não funcionais
 
@@ -79,9 +79,11 @@
 
 ### RNF7: A comunicação do _controlador_ com o _simulador_ deve ser monitorável
 
-### RNF8: Um _elevador_ não deve apresentar falhas no atendimento de pelo menos 20 _requisições_
+### RNF8: Todos os _elevadores_ não devem apresentar falhas no atendimento de pelo menos 10 _requisições_
 
-### RNF9: Um _elevador_ deve ser capaz de atender uma sobrecarga de _requisições_
+### RNF9: Um _elevador_ deve ser capaz de atender uma sobrecarga de _requisições_ (requisições a todos os botões possíveis)
+
+### RNF10: Caso o _elevador_ esteja parado, deve começar a atender uma requisição nova em menos de 1 segundo
 
 # Restrições
 
@@ -97,12 +99,14 @@
 
 ### R6: O ambiente de desenvolvimento do software deve ser o IAR EWARM versão 9
 
-### R7: Software deve conter o mínimo de variáveis globais possíveis
+### R7: Software não deve utilizar variáveis e funções globais
 
-### R8: O sistema deve fazer uso de filas de mensagens
+### R8: Cada parte do sistema deve ser desenvolvida em um arquivo separado, com arquivos de cabeçalho e de implementação
 
-### R9: O _controlador_ deve ser multi-threaded, com uma thread dedicada por _elevador_
+### R9: O sistema deve fazer uso de filas de mensagens
 
-### R10: O sistema não precisa ser expansível para mais de 3 _elevadores_
+### R10: O _controlador_ deve ser multi-threaded, com uma thread dedicada por _elevador_
 
-### R11: O sistema não precisa ser expansível para mais de 15 andares
+### R11: O sistema não precisa ser expansível para mais de 3 _elevadores_
+
+### R12: O sistema não precisa ser expansível para mais de 15 andares

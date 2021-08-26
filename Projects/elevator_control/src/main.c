@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "cmsis_os2.h"  // CMSIS-RTOS
+#include "stack_protection.h"
 
 // Internal deps
 #include "elevator.h"
@@ -12,7 +13,6 @@
 #include "main_thread.h"
 #include "signal.h"
 #include "signal_handler_thread.h"
-#include "stack_protection.h"
 #include "uart.h"
 
 typedef struct {
