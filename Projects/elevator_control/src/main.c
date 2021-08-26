@@ -26,8 +26,6 @@ typedef struct {
       right_elevator_thread;
 } app_t;
 
-static app_t app;
-
 static void createMutex(app_t* app) {
   app->uart_write_mutex =
       osMutexNew(&(osMutexAttr_t){.name = "UART Write Mutex"});
@@ -96,6 +94,8 @@ static void createFanOutThread(app_t* app) {
 }
 
 void main(void) {
+  static app_t app;
+
   UARTInit();
   printKernelInfo();
   printKernelState();
