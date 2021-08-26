@@ -29,6 +29,7 @@ typedef enum {
   elevator_state_closing_doors,
   elevator_state_opening_doors,
   elevator_state_awaiting_passengers,
+  elevator_state_finding_alignment,
 } elevator_state_t;
 
 typedef enum {

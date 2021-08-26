@@ -14,7 +14,7 @@ typedef enum {
   signal_doors_closed,
   signal_internal_button_pressed,
   signal_external_button_pressed,
-  signal__internal__should_close_doors,
+  signal__internal__doors_timeout,
 } signal_code_t;
 
 typedef struct {
